@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en-us">
+<head>
+    <title>HTML + JSON Report demo</title>
+    <script type="text/javascript" src="js/jsonreport.js"></script>
+    <style type="text/css">
+        BODY {
+            font: 14px Verdana, Arial;
+            color: #444;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            overflow-y: scroll;
+        }
+        H1 {
+          margin:0;
+          font: 24px Helvetica, Verdana, Arial;
+          padding: 20px 0 10px 0;
+          background: #FBFBFB;
+          border-bottom: solid 1px #fff;
+        }
+        A {
+          color: #093;
+          text-decoration: none;
+        }
+        A:hover {
+          text-decoration: underline;
+        }
+        #usage {
+            border-top: solid 1px #dfdfdf;
+            border-bottom: solid 1px #dfdfdf;
+            margin: 0 0 10px 0;
+            padding: 5px;
+            background: #f1f1f1;
+            line-height: 20px;
+            text-align: center;
+        }
+        TEXTAREA {
+            width: 990px;
+            height: 100px;
+        }
+        BUTTON {
+            margin: 20px;
+            padding: 4px 8px;
+        }
+        #use {
+            clear: both;
+            border: 1px solid #ccc;
+            margin: auto;
+            width: 960px;
+        }
+        #use H4 {
+            margin: 0;
+            padding: 5px;
+            background: #ccc;
+            color: #fff;
+            text-shadow: 1px 1px 1px #444;
+            font-size: 18px;
+            font-weight: normal;
+        }
+        PRE {
+            background: #f1f1f1;
+            padding: 4px 8px;
+            color:#000;
+            text-shadow: 0 1px 0 #fff;
+        }
+        .jsonreport {
+            text-align:left;
+            position: absolute;
+            left: 50%;
+            background: #fff;
+            width: 1000px;
+            margin-left: -500px;
+            overflow: auto;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>
+        Online <a href="https://github.com/ServiceStack/ServiceStack/wiki/HTML5ReportFormat">HTML5 JSON Report format</a>
+        to view any JSON data in a human-readable HTML view
+    </h1>
+
+    <div id="usage">
+        <strong>Usage:</strong> Paste JSON text in the TEXTAREA below and click <b>View JSON Report</b> button.
+    </div>
+
+    <textarea class="json" onfocus="var txt=this;setTimeout(function(){txt.select();},0)">{"Customer":{"Id":"BOLID","CompanyName":"B�lido Comidas preparadas","ContactName":"Mart�n Sommer","ContactTitle":"Owner","Address":"C/ Araquil, 67","City":"Madrid","PostalCode":"28023","Country":"Spain","Phone":"(91) 555 22 82","Fax":"(91) 555 91 99"},"CustomerOrders":[{"Order":{"Id":10326,"CustomerId":"BOLID","EmployeeId":4,"OrderDate":"\/Date(844898400000+0000)\/","RequiredDate":"\/Date(847321200000+0000)\/","ShippedDate":"\/Date(845244000000+0000)\/","ShipVia":2,"Freight":77.92,"ShipName":"B�lido Comidas preparadas","ShipAddress":"C/ Araquil, 67","ShipCity":"Madrid","ShipPostalCode":"28023","ShipCountry":"Spain"},"OrderDetails":[{"OrderId":10326,"ProductId":4,"UnitPrice":17.6,"Quantity":24,"Discount":0},{"OrderId":10326,"ProductId":57,"UnitPrice":15.6,"Quantity":16,"Discount":0},{"OrderId":10326,"ProductId":75,"UnitPrice":6.2,"Quantity":50,"Discount":0}]},{"Order":{"Id":10801,"CustomerId":"BOLID","EmployeeId":4,"OrderDate":"\/Date(883350000000+0000)\/","RequiredDate":"\/Date(885769200000+0000)\/","ShippedDate":"\/Date(883522800000+0000)\/","ShipVia":2,"Freight":97.09,"ShipName":"B�lido Comidas preparadas","ShipAddress":"C/ Araquil, 67","ShipCity":"Madrid","ShipPostalCode":"28023","ShipCountry":"Spain"},"OrderDetails":[{"OrderId":10801,"ProductId":17,"UnitPrice":39,"Quantity":40,"Discount":0.25},{"OrderId":10801,"ProductId":29,"UnitPrice":123.79,"Quantity":20,"Discount":0.25}]},{"Order":{"Id":10970,"CustomerId":"BOLID","EmployeeId":9,"OrderDate":"\/Date(890694000000+0000)\/","RequiredDate":"\/Date(891900000000+0000)\/","ShippedDate":"\/Date(893368800000+0000)\/","ShipVia":1,"Freight":16.16,"ShipName":"B�lido Comidas preparadas","ShipAddress":"C/ Araquil, 67","ShipCity":"Madrid","ShipPostalCode":"28023","ShipCountry":"Spain"},"OrderDetails":[{"OrderId":10970,"ProductId":52,"UnitPrice":7,"Quantity":40,"Discount":0.2}]}]}</textarea>
+
+    <div>
+        <button onclick="document.getElementById('use').style.display='none'; document.getElementsByClassName('jsonreport')[0].innerHTML=_.jsonreport( document.getElementsByClassName('json')[0].value );">View JSON Report</button>
+    </div>
+
+    <div class="jsonreport"></div>
+
+    <div id="use">
+        <h4>Use jsonreport.js in your own pages</h4>
+        <p>
+            <b><a href="https://github.com/AjaxStack/AjaxStack/blob/master/src/jsonreport/jsonreport.js">jsonreport.js</a></b> is a stand-alone javascript library you can
+            embed in your own pages by adding a reference to the js library:
+        </p>
+        <pre>&lt;script type="text/javascript" src="jsonreport.js"&gt;&lt;/script&gt;</pre>
+        <p>
+            this adds the function <b>_.jsonreport(json)</b> you can call to turn your JSON into human-readable HTML. e.g:
+        </p>
+
+        <pre>var html = _.jsonreport('{"any":"json data"}');</pre>
+
+        <p>
+            Note: to use the default jsonreport styles, add the <b>.jsonreport</b> className to the containing element, e.g:
+        </p>
+
+        <pre>&lt;div class="jsonreport"&gt;&lt;div&gt;</pre>
+
+        <p>
+            Complete example:
+        </p>
+        <pre>document.getElementsByClassName('jsonreport')[0].innerHTML = _.jsonreport('{"any":"json data"}');</pre>
+
+        <p>
+            Leave feedback on the project website:
+            <a href="https://github.com/AjaxStack/AjaxStack/">https://github.com/AjaxStack/AjaxStack/</a>
+            or <a href="http://twitter.com/demisbellot">@demisbellot</a> on twitter.
+        </p>
+    </div>
+
+    <script type="text/javascript">
+       document.getElementsByClassName('json')[0].focus();
+    </script>
+
+
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-7722718-8']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+
+
+</body>
+</html>

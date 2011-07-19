@@ -1,0 +1,66 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+    <head>
+        <meta name="generator" content="HTML Tidy for Windows (vers 14 February 2006), see www.w3.org">
+        <title>
+            VALVE dashboard
+        </title>
+        <script type="text/javascript" src="js/jquery.js">
+</script>
+        <script type="text/javascript" src="js/jsonreport.js">
+</script>
+        <script type="text/javascript" src="js/jsonviewmod.js">
+</script>
+        <script type="text/javascript" src="js/valve.js">
+</script>
+        <script type="text/javascript" src="js/javascript.js">
+</script>
+
+<!--Load the AJAX API-->
+    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+	<script type="text/javascript" src="js/chart.js"></script>
+
+
+
+
+        <link rel="stylesheet" type="text/css" href="css/default.css">
+        <link rel="stylesheet" type="text/css" href="css/jsonview.css">
+    </head>
+    <body>
+        <div id="debug"></div>
+        <div id="test"></div>
+        <div id="input"></div>
+        <form action="">
+            <p>
+                <label for="inputurl" id="labelurl">Pipe URL</label> <input type="text" name="inputurl" id="inputurl" size="100" value="http://pipes.yahoo.com/pipes/pipe.info?_id=45ac0c6883a348080eaa4522ff10e9e7" class="text-input"><br>
+            </p>
+            <p>
+                <span class="show_hide">Parameters</span>
+            </p>
+            <p class="sliding">
+                <label>Parameter:</label> <input type="text" class="param_name"> <label>Value:</label> <input type="text" class="param_value"> <span class="remove">Remove</span>
+            </p>
+            <p class="sliding">
+                <span class="add">Add</span>
+            </p>
+        </form>
+        <div>
+            <br>
+            <input type="button" value="Import Pipe" onclick="pipeCall(inputurl)"> <input type="button" value="Pass Parameters" onclick="createArrayFromParameters()">
+        </div>
+        <div>
+            <h3>
+                Visualisation:
+            </h3>
+			<!--Div that will hold the pie chart-->
+			<div id="chart_div"></div>
+
+        </div>
+        <div class="slidingDiv jsonreport"></div>
+        <h3>
+            Json Output:
+        </h3>
+        <div id="selectedAttribute"></div>
+        <div id="jsondata"></div>
+    </body>
+</html>

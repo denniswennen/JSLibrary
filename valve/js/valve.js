@@ -6,7 +6,9 @@
 
 
 // Baseline setup
-
+google.load('visualization', '1', {
+		'packages' : ['corechart', 'table']
+	});
 
 /* Standard JSON object */
 var pipeObj = {
@@ -20,29 +22,182 @@ var pipeObj = {
 		"callback" : "", //function called to handle the JSON data
 		"items" : []// contains the list of items.
 	}
-}
+};
+
+var YPipeObj = {
+	count : 0,
+	value : {
+		title : "", // name of the Yahoo Pipe
+		description : "", // description for the Pipe
+		link : "", //link to the pipe
+		pubDate : "", //The moment the Pipe output was created
+		generator : "", //Generator of the JSON data, mostly Yahoo pipes itself
+		callback : "", //function called to handle the JSON data
+		items : []// contains the list of items.
+	},
+	
+	params : {},
+	attributes : {},
+	
+	//representation of parameters
+	
+	setParam : function (key, val) {
+		this.params[key] = val;
+	},
+	
+	getParam : function (key) {
+		return param.key;
+	},
+	
+	getItems : function () {
+		return this.items;
+	},
+	
+	setItems : function (itemsArray) {
+		this.items = itemsArray;
+	},
+};
+
+// Datastructure for the Google Data Table
+var GoogleDataTable = {
+	
+	init : function () {
+		this.JSONdata = new google.visualization.DataTable();
+	},
+	makeColumns : function (pipeJSON) {
+		//code to fill the dataTable with all the items from the Pipe
+		//each row is an item. every parameter is added
+		// STILL SOME WORK. NOT ALL ATTRIBUTES ARE LOADED
+		var json = pipeJSON.value.items[0];
+		this.getAttributes(json);
+		/*
+		for (var attr in firstItem) {
+		
+		this.JSONdata.addColumn(typeof(attr), attr.toString(), attr.toString() + "column");
+		};
+		 */
+		
+	},
+	
+	getAttributes : function (json) {
+		
+		var prop;
+		
+		if (checkType('Object', json) || checkType('Array', json)) { //json is an object, further parsing
+			for (prop in json) {
+				this.getAttributes(json[prop]);
+				if (!checkType('Object', json[prop])) { //Objects cannot be used as data
+					//do something with the prop of the item
+					this.JSONdata.addColumn(typeof(prop), prop.toString(), prop.toString() + "column");
+				}
+			}
+		}
+		
+	},
+	
+	fillColumns : function (pipeJSON) {
+		
+		var currentItem,
+		currentAttr,
+		dataTable = this.JSONdata,
+		item,
+		obj;
+		
+		dataTable.addRows(pipeJSON.count);
+		
+		for (currentItem = 0; currentItem < pipeJSON.count; currentItem++) {
+			
+			item = pipeJSON.value.items[currentItem]; //for each item
+			currentAttr = 0;
+			
+			/** previous loop iteration with OBJECT String
+			for(var attr in item) {
+			el = item[attr];
+			if (typeof(el) == 'string' || typeof(el) =='number') {// for each attribute of the items
+			dataTable.setCell(currentItem, currentAttr, el);
+			currentAttr++;
+			}
+			else {
+			dataTable.setCell(currentItem, currentAttr, "[OBJECT]");
+			currentAttr++;
+			}
+			}**/
+			
+		}
+		
+	},
+	
+	parseObj : function (obj) { //integrate the parse function here
+		if (typeof obj == 'number' || typeof obj == 'string') {
+			return obj;
+		} else {
+			return this.parseObj(obj);
+		}
+	},
+	
+	insertRows : function (pipeJSON) {
+		var i,
+		opt_cellArray = [],
+		pos,
+		firstItem = pipeJSON.value.items[0];
+		
+		for (var attr in firstItem) {
+			opt_cellArray.push(firstItem[attr]);
+		}
+		
+		for (i = 0; i < pipeJSON.count; i++) { //for every row
+			//addRow(opt_cellArray); //contains an Array with al the values for a specific row
+		};
+		
+	},
+	
+};
 
 // Loading functions
 // Parsing functions
+
+var itemParser = {
+	
+	getAttributes : function (json) {
+		
+		var prop;
+		
+		if (this.checkType('Object', json) || this.checkType('Array', json)) { //json is an object, further parsing
+			for (prop in json) {
+				this.getAttributes(json[prop]);
+				if (!checkType('Object', json[prop])) { //Objects cannot be used as data
+					//do something with the property of the item
+				}
+			}
+		}
+		
+	},
+};
+
 // Object functions
 /** convert the input url **/
 function pipeCall(inputURL) {
+	
+	document.getElementById('loading').style.display = 'inline';
+	//$('img#loadingImage').style.display = 'inline';
+	
 	var url,
-		paramObj,
-		str = '';
-		
-	paramObj = GetParameters();
-		
-	for(var prop in paramObj) {
-    if(paramObj.hasOwnProperty(prop))
-        str += "&" + prop + "=" + paramObj[prop];
+	paramObj,
+	str = '';
+	
+	//paramObj = GetParameters();
+	GetParametersFromInput();
+	
+	paramObj = YPipeObj.params;
+	for (var prop in paramObj) {
+		if (paramObj.hasOwnProperty(prop))
+			str += "&" + prop + "=" + paramObj[prop];
 	}
 	
 	url = inputURL.value.replace("info", "run");
 	url += "&_render=json";
 	url += str;
 	url += "&_callback=pipeCallback";
-	
 	
 	var scriptEl = document.createElement('script');
 	scriptEl.type = 'text/javascript';
@@ -51,14 +206,17 @@ function pipeCall(inputURL) {
 	scriptInsert.parentNode.insertBefore(scriptEl, scriptInsert);
 	
 	debug(url);
+	
 }
 
 /** Handles the Pipe response Callback **/
-function pipeCallback(response) {
+function pipeCallback(jsonString) {
 	var output;
 	
-	pipeObj = response;
-	debug("respone.count:" + pipeObj.count);
+	YPipeObj.count = jsonString.count;
+	YPipeObj.value = jsonString.value;
+	
+	debug(jsonString.count);
 	
 	//output = val(response);
 	//document.getElementById('attributeslist').innerHTML = output;
@@ -66,13 +224,34 @@ function pipeCallback(response) {
 	this.jsonFormatter = new JSONFormatter();
 	
 	try {
-		outputDoc = this.jsonFormatter.jsonToHTML(response, this.uri);
+		outputDoc = this.jsonFormatter.jsonToHTML(jsonString, this.uri);
 	} catch (e) {
 		outputDoc = this.jsonFormatter.errorPage(e, this.data, this.uri);
 	}
 	
 	document.getElementById('jsondata').innerHTML = outputDoc;
 	addClickHandlers();
+	
+	drawGTableFromJSON(YPipeObj, 'jsontable');
+	//itemParser.parseJSON(YPipeObj.value.items);
+	
+	document.getElementById('loading').style.display = 'none'; //remove loading indicator
+	
+}
+
+function drawGTableFromJSON(json, outputDiv) {
+	
+	//Draw Google Viz
+	GoogleDataTable.init();
+	GoogleDataTable.makeColumns(json);
+	//GoogleDataTable.insertRows(YPipeObj);
+	//GoogleDataTable.fillColumns(json);
+	
+	// Create and draw the visualization.
+	visualization = new google.visualization.Table(document.getElementById(outputDiv));
+	visualization.draw(GoogleDataTable.JSONdata, {
+			'allowHtml' : true
+		});
 	
 }
 
@@ -165,18 +344,19 @@ function propagateAttributes() {
 	}
 }
 
-function GetParameters() {
+// Gets the parameters from the input fields
+function GetParametersFromInput() {
 	
 	var param_names = document.getElementsByClassName("param_name"),
-		param_values = document.getElementsByClassName("param_value"),
-		paramObj = {};
+	param_values = document.getElementsByClassName("param_value");
 	
 	for (var i = 0; i < param_names.length; i++) {
-		if( param_names[i].value != '' && param_values[i].value != '' ) {
-			paramObj[param_names[i].value] = param_values[i].value;
+		if (param_names[i].value != '' && param_values[i].value != '') {
+			//paramObj[param_names[i].value] = param_values[i].value;
+			YPipeObj.setParam(param_names[i].value, param_values[i].value);
+			
 		}
 	}
-	return paramObj;
 }
 
 /** Prints out debug variable **/
@@ -188,5 +368,12 @@ function debug(variable) {
 	} else {
 		outputdiv.innerHTML += "<br />DEBUG:" + variable;
 	}
+}
+
+function checkType(type, obj) {
+	var clas;
+	
+	clas = Object.prototype.toString.call(obj).slice(8, -1);
+	return obj !== undefined && obj !== null && clas === type;
 }
  

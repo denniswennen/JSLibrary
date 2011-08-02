@@ -10,11 +10,11 @@
 	<body>
 		<form>
 			<label for="pipeurl" id="url_label">Pipe URL</label>  
-			<input type="text" name="pipeurl" id="pipeurl" size="30" value="" class="text-input" />
-			<label class="error" for="pipeurl" id="url_error">This field is required.</label>
-			<label for="param" id="param_label">Parameter</label>  
-			<input type="text" name="param id="parameter" size="30" value="" class="text-input" />
-			<label class="error" for="param" id="param_error">This field is required.</label>
+			<input type="text" name="inputurl" id="inputurl" size="100" value="http://pipes.yahoo.com/pipes/pipe.info?_id=45ac0c6883a348080eaa4522ff10e9e7" class="text-input" />
+			<br /><label for="param" id="param_label">Parameter</label> 
+			<input type="text" name="param" id="param" size="10" value="1" class="text-input" />
+			<br /><input type="button" value="Test Feed Pipe" onclick=" generateURL( this.form ); " />
 		</form> 
 	</body>
-</html>s
+</html>
+

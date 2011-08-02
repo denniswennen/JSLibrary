@@ -13,9 +13,12 @@ var pipeKeys = {}; //
 
 if (!_) var _ = {};
 _.jsonreport = (function(){
-    var root = this, doc = document,
-        $ = function(id) { return doc.getElementById(id); },
-        $$ = function(sel) { return doc.getElementsByTagName(sel); },
+    var root = this, 
+		doc = document,
+        $ = function(id) { 
+			return doc.getElementById(id); },
+        $$ = function(sel) { 
+			return doc.getElementsByTagName(sel); },
         $each = function(fn) { 
 			for (var i=0,len=this.length; i<len; i++) {			
 				fn(i, this[i], this);
@@ -27,18 +30,17 @@ _.jsonreport = (function(){
 		$each.call(arr, fn); 
 	};
 
-    var splitCase = function(t) { return typeof t != 'string' ? t : t.replace(/([A-Z]|[0-9]+)/g, ' $1').replace(/_/g,' '); },
+    var splitCase = function(t) { 
+			return typeof t != 'string' ? t : t.replace(/([A-Z]|[0-9]+)/g, ' $1').replace(/_/g,' '); },
         uniqueKeys = function(m){ 
 			var h={}; 
 			for (var i=0,len=m.length; i<len; i++) 
 				for (var k in m[i]) h[k] = k; 
-			return h; 
-		},
+			return h; },
         keys = function(o){ 
 			var a=[]; 
 			for (var k in o) a.push(k); 
-				return a; 
-			}
+				return a; };
     var tbls = [];
 
     function val(m) {

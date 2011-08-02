@@ -1,5 +1,5 @@
 /**
- * @author Benjamin Hollis
+ * @author Benjamin Hollis - Dennis Swennen
  * 
  * This component provides a stream converter that can translate from JSON to HTML.
  * It is compatible with Firefox 3 and up, since it uses many components that are new

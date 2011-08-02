@@ -1,10 +1,18 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-<html>
+<!DOCTYPE HTML>
+<html lang="en-US">
     <head>
-        <meta name="generator" content="HTML Tidy for Windows (vers 14 February 2006), see www.w3.org">
+		<meta charset="UTF-8">
         <title>
             VALVE dashboard
         </title>
+		<!--Load the AJAX API-->
+    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+	
+	<!--Load the D3.js Vizualisation API-->
+	<script type="text/javascript" src="js/d3/d3.js"></script>
+	
+
+	
         <script type="text/javascript" src="js/jquery.js">
 </script>
         <script type="text/javascript" src="js/jsonreport.js">
@@ -15,16 +23,16 @@
 </script>
         <script type="text/javascript" src="js/javascript.js">
 </script>
+		<script type="text/javascript" src="js/d3viz.js"></script>
+		<script type="text/javascript" src="js/chart.js"></script>
 
-<!--Load the AJAX API-->
-    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
-	<script type="text/javascript" src="js/chart.js"></script>
 
 
 
 
         <link rel="stylesheet" type="text/css" href="css/default.css">
         <link rel="stylesheet" type="text/css" href="css/jsonview.css">
+		<link rel="stylesheet" type="text/css" href="css/d3.css">
     </head>
     <body>
         <div id="debug"></div>
@@ -38,29 +46,37 @@
                 <span class="show_hide">Parameters</span>
             </p>
             <p class="sliding">
-                <label>Parameter:</label> <input type="text" class="param_name"> <label>Value:</label> <input type="text" class="param_value"> <span class="remove">Remove</span>
+                <label>Parameter:</label> <input type="text" class="param_name" value="truncateAfter"> <label>Value:</label> <input type="text" class="param_value" value="5"> <span class="remove">Remove</span>
             </p>
             <p class="sliding">
                 <span class="add">Add</span>
             </p>
+			<br>
+            <input type="button" value="Import Pipe" onclick="pipeCall(inputurl)">
+			<div id="loading" style="display:none"><img id="loadingImage" src="img/ajax-loader.gif" alt="loadingImage" /></div>
+			<br /><input type="button" id="jsontableButton" value="test Function" onclick="testViz()"/>
         </form>
         <div>
-            <br>
-            <input type="button" value="Import Pipe" onclick="pipeCall(inputurl)"> <input type="button" value="Pass Parameters" onclick="createArrayFromParameters()">
+            
         </div>
-        <div>
-            <h3>
-                Visualisation:
-            </h3>
-			<!--Div that will hold the pie chart-->
-			<div id="chart_div"></div>
-
-        </div>
+        
         <div class="slidingDiv jsonreport"></div>
         <h3>
             Json Output:
         </h3>
-        <div id="selectedAttribute"></div>
+        <div>The selected attribute is: <span id="selectedAttributes"></span></div>
         <div id="jsondata"></div>
+		<div id="d3library">
+			<h4 style="color:orange">Google Chart Sandbox</h4>
+		</div>
+		<div>
+			<div>
+				<table id="jsontable"></table>
+			</div>
+			<!--Div that will hold the pie chart-->
+			<div id="chart_div"></div>
+
+        </div>
+		
     </body>
 </html>

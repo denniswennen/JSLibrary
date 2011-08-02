@@ -7,7 +7,7 @@ $(document).ready(function () {
 			});
 		
 		$(".add").click(function () {
-				var el = $("form > p:nth-child(3)")
+				var el = $("form > p:nth-child(1)")
 				.clone(true)
 				.insertBefore("form > p:last-child");
 				return false;
@@ -91,8 +91,10 @@ function addClickHandlers() {
 	
 	//Function executed when an attribute is clicked
 	function Clicker(evt) {
-		
-		document.getElementById("selectedAttribute").innerHTML = 'The selected attribute: <p class="selectedAttribute">' + evt.target.innerHTML + '<p>';
+	
+		var newAttr = evt.target.innerHTML,
+			currentAttr = document.getElementById('selectedAttributes').innerHTML.split(" | ",1);
+		document.getElementById("selectedAttributes").innerHTML = newAttr + " | " + currentAttr;
 		
 	}
 	

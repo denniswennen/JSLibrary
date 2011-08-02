@@ -1,3 +1,8 @@
+/***
+*
+* Javascript for viewing a JSON output
+*/
+
 function JSONFormatter() {
 }
 
@@ -99,4 +104,4 @@ JSONFormatter.prototype = {
 		return content;
 	}
 };
- 
+

@@ -10,6 +10,8 @@ p span:hover { background-color:#ff0; cursor:pointer; }
 .remove { color:red; }
 .add,.show_hide { color:green; }
 
+#dashboard { background-color:lightgrey; }
+
 /*
 
 .jsonreport TABLE { border-collapse:collapse; border: solid 1px #ccc; clear: left; background-color: #99CCFF; }

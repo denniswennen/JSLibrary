@@ -10,20 +10,8 @@ google.load('visualization', '1', {
 		'packages' : ['corechart', 'table']
 	});
 
-/* Standard JSON object */
-var pipeObj = {
-	"count" : 0,
-	"value" : {
-		"title" : "MyTitle", // name of the Yahoo Pipe
-		"description" : "MyDescription", // description for the Pipe
-		"link" : "http:\/\/pipes.yahoo.com\/pipes\/pipe.info?_id=", //link to the pipe
-		"pubDate" : "Mon, 18 Jul 2011 03:55:41 -0700", //The moment the Pipe output was created
-		"generator" : "http:\/\/pipes.yahoo.com\/pipes\/", //Generator of the JSON data, mostly Yahoo pipes itself
-		"callback" : "", //function called to handle the JSON data
-		"items" : []// contains the list of items.
-	}
-};
 
+//GLobal only item for representing the returned JSON object
 var YPipeObj = {
 	count : 0,
 	value : {
@@ -37,7 +25,7 @@ var YPipeObj = {
 	},
 	
 	params : {},
-	attributes : {},
+	attributes : [],
 	
 	//representation of parameters
 	
@@ -58,37 +46,115 @@ var YPipeObj = {
 	},
 };
 
+
+//UPDATED: pipe Object constructor
+function pipe(json) {
+
+	this.count = json.count;
+	this.value = json.value;
+	
+}
+
+
+
+// GOOGLE DATA TABLE FUNCTIONS
+function googleDataTable() {
+	this.JSONdata = new google.visualization.DataTable();
+	this.attributes = [];
+}
+
+googleDataTable.prototype.makeColumns = function (pipeObj) {
+		//code to fill the dataTable with all the items from the Pipe
+		//each row is an item. every parameter is added
+		var json = flatten( pipeObj.value.items[0] );
+		
+		for (prop in json) {
+			this.JSONdata.addColumn(typeof(prop), prop.toString(), "col_" + prop.toString());
+			this.attributes.push(prop); // CHANGE PLACE?
+		}
+}
+
+googleDataTable.prototype.makeRows = function (pipeObj) {
+		var dataTable = this.JSONdata,
+		items = pipeObj.value.items,
+		count = pipeObj.count,
+		itemNr,
+		propNr,
+		flatItem;
+		
+		dataTable.addRows(count); //first adds the rows in the DataTable
+		
+		for (itemNr = 0; itemNr < count; itemNr++) {
+			
+			flatItem = flatten(items[itemNr]); //flatten item
+			propNr = 0;
+			for (prop in flatItem) {
+				dataTable.setCell(itemNr, propNr, flatItem[prop] ? flatItem[prop] : "null");
+				propNr++;
+			}
+		}
+
+}
+
+
+
+
+
+
 // Datastructure for the Google Data Table
 var GoogleDataTable = {
 	
 	init : function () {
 		this.JSONdata = new google.visualization.DataTable();
 	},
-	makeColumns : function (pipeJSON) {
+	
+	makeColumns : function (pip) {
 		//code to fill the dataTable with all the items from the Pipe
 		//each row is an item. every parameter is added
 		// STILL SOME WORK. NOT ALL ATTRIBUTES ARE LOADED
-		var json = pipeJSON.value.items[0];
-		this.getAttributes(json);
-		/*
-		for (var attr in firstItem) {
+		var json = flatten( pip.value.items[0] );
 		
-		this.JSONdata.addColumn(typeof(attr), attr.toString(), attr.toString() + "column");
-		};
-		 */
+		for (prop in json) {
+			this.JSONdata.addColumn(typeof(prop), prop.toString(), "col_" + prop.toString());
+			YPipeObj.attributes.push(prop); // CHANGE PLACE
+		}
 		
 	},
 	
-	getAttributes : function (json) {
+	makeRows : function (pipeJSON) {
 		
-		var prop;
+		var dataTable = this.JSONdata,
+		items = pipeJSON.value.items,
+		count = pipeJSON.count,
+		itemNr,
+		propNr,
+		flatItem;
+		
+		dataTable.addRows(count); //first adds the rows in the DataTable
+		
+		for (itemNr = 0; itemNr < count; itemNr++) {
+			
+			flatItem = flatten(items[itemNr]); //flatten item
+			propNr = 0;
+			for (prop in flatItem) {
+				dataTable.setCell(itemNr, propNr, flatItem[prop] ? flatItem[prop] : "null");
+				propNr++;
+			}
+		}
+		
+	},
+	
+	fillCells : function (json, itemNr) {
+		var prop,
+		attrNr = 0;
 		
 		if (checkType('Object', json) || checkType('Array', json)) { //json is an object, further parsing
 			for (prop in json) {
-				this.getAttributes(json[prop]);
+				this.fillCells(json[prop], itemNr, attrNr); // for objects at a deeper level
 				if (!checkType('Object', json[prop])) { //Objects cannot be used as data
 					//do something with the prop of the item
-					this.JSONdata.addColumn(typeof(prop), prop.toString(), prop.toString() + "column");
+					dataTable.setCell(itemNr, attrNr, val);
+					attrNr++;
 				}
 			}
 		}
@@ -97,33 +163,32 @@ var GoogleDataTable = {
 	
 	fillColumns : function (pipeJSON) {
 		
-		var currentItem,
-		currentAttr,
-		dataTable = this.JSONdata,
+		var itemNr,
 		item,
-		obj;
+		obj,
+		val,
+		dataTable = this.JSONdata;
 		
 		dataTable.addRows(pipeJSON.count);
 		
-		for (currentItem = 0; currentItem < pipeJSON.count; currentItem++) {
+		for (itemNr = 0; itemNr < pipeJSON.count; itemNr++) {
 			
-			item = pipeJSON.value.items[currentItem]; //for each item
-			currentAttr = 0;
-			
-			/** previous loop iteration with OBJECT String
-			for(var attr in item) {
-			el = item[attr];
-			if (typeof(el) == 'string' || typeof(el) =='number') {// for each attribute of the items
-			dataTable.setCell(currentItem, currentAttr, el);
-			currentAttr++;
-			}
-			else {
-			dataTable.setCell(currentItem, currentAttr, "[OBJECT]");
-			currentAttr++;
-			}
-			}**/
-			
+			item = pipeJSON.value.items[itemNr]; //for each item
+			this.fillCells(item, itemNr);
 		}
+		
+		/** previous loop iteration with OBJECT String
+		for(var attr in item) {
+		el = item[attr];
+		if (typeof(el) == 'string' || typeof(el) =='number') {// for each attribute of the items
+		dataTable.setCell(currentItem, currentAttr, el);
+		currentAttr++;
+		}
+		else {
+		dataTable.setCell(currentItem, currentAttr, "[OBJECT]");
+		currentAttr++;
+		}
+		}**/
 		
 	},
 	
@@ -153,60 +218,156 @@ var GoogleDataTable = {
 	
 };
 
-// Loading functions
-// Parsing functions
-
-var itemParser = {
+// Controls the User interface
+var ControlDashboard = {
 	
-	getAttributes : function (json) {
+	propagateAttributeBoxes : function (dataT) {
 		
-		var prop;
+		var i,
+		arr = dataT.attributes;
 		
-		if (this.checkType('Object', json) || this.checkType('Array', json)) { //json is an object, further parsing
-			for (prop in json) {
-				this.getAttributes(json[prop]);
-				if (!checkType('Object', json[prop])) { //Objects cannot be used as data
-					//do something with the property of the item
-				}
-			}
+		for (i = 0; i < arr.length; ++i) {
+			addOption(document.getElementById("attr1dropdown"), arr[i], arr[i]);
+			addOption(document.getElementById("attr2dropdown"), arr[i], arr[i]);
 		}
 		
 	},
+	
 };
+// Loading functions
+// Parsing functions
+
+
+function flatten(json) {
+	var output = {},
+	walk = function (j) {
+		var jp;
+		for (var prop in j) {
+			jp = j[prop];
+			if (jp == null) {
+				output[prop] = jp;
+			} else {
+				if (jp.toString() === "[object Object]") {
+					walk(jp);
+				} else {
+					output[prop] = jp;
+				}
+			}
+		}
+	};
+	walk(json);
+	return output;
+}
 
 // Object functions
 /** convert the input url **/
-function pipeCall(inputURL) {
+function pipeCallScriptTag(inputURL) {
+	
+	var uri,
+	scriptEl,
+	scriptInsert;
 	
 	document.getElementById('loading').style.display = 'inline';
-	//$('img#loadingImage').style.display = 'inline';
 	
-	var url,
+	uri = createCallbackURI(inputURL);
+	
+	scriptEl = document.createElement('script');
+	scriptEl.type = 'text/javascript';
+	scriptEl.src = uri;
+	scriptInsert = document.getElementsByTagName('script')[0];
+	scriptInsert.parentNode.insertBefore(scriptEl, scriptInsert);
+	
+	debug(uri);
+	
+}
+
+function createCallbackURI(uri) {
+	
+	var fullUri,
 	paramObj,
 	str = '';
 	
-	//paramObj = GetParameters();
-	GetParametersFromInput();
-	
+	GetParametersFromInputFields();
 	paramObj = YPipeObj.params;
 	for (var prop in paramObj) {
 		if (paramObj.hasOwnProperty(prop))
 			str += "&" + prop + "=" + paramObj[prop];
 	}
 	
-	url = inputURL.value.replace("info", "run");
-	url += "&_render=json";
-	url += str;
-	url += "&_callback=pipeCallback";
+	fullUri = uri.value.replace("info", "run");
+	fullUri += "&_render=json";
+	fullUri += str;
+	fullUri += "&_callback=pipeCallback";
 	
-	var scriptEl = document.createElement('script');
-	scriptEl.type = 'text/javascript';
-	scriptEl.src = url;
-	var scriptInsert = document.getElementsByTagName('script')[0];
-	scriptInsert.parentNode.insertBefore(scriptEl, scriptInsert);
+	return fullUri;
+}
+
+function createRequestURI(uri) {
 	
-	debug(url);
+	var fullUri,
+	paramObj,
+	str = '';
 	
+	GetParametersFromInputFields();
+	paramObj = YPipeObj.params;
+	for (var prop in paramObj) {
+		if (paramObj.hasOwnProperty(prop))
+			str += "&" + prop + "=" + paramObj[prop];
+	}
+	
+	fullUri = uri.value.replace("info", "run");
+	fullUri += "&_render=json";
+	fullUri += str;
+	//fullUri += "&_callback=pipeCallback";
+	
+	return fullUri;
+}
+
+function pipeCallCORS(inputURL) {
+	
+	var request = createCORSRequest("get", createRequestURI(inputURL) );
+	
+	document.getElementById('loading').style.display = 'inline';
+	
+	if (request) {
+		request.onload = function () {
+			var r = JSON.parse(request.responseText); //the actual parsing from Yahoo Pipes to a JSON object
+			//do something with the returned JSON object 'r'
+			processResponse( r );
+			
+			
+		};
+		request.send();
+	}
+	
+
+}
+
+function processResponse(response) {
+
+	var pipe1 = new pipe(response);
+	
+	//Displays Google Data Table
+	drawTable(pipe1, 'jsontable');
+	
+	
+	document.getElementById('loading').style.display = 'none'; //remove loading indicator
+
+}
+
+
+function createCORSRequest(method, url) {
+	var xhr = new XMLHttpRequest();
+	if ("withCredentials" in xhr) {
+		xhr.open(method, url, true);
+	} else
+		if (typeof XDomainRequest != "undefined") {
+			xhr = new XDomainRequest();
+			xhr.open(method, url);
+		} else {
+			xhr = null;
+		}
+	return xhr;
 }
 
 /** Handles the Pipe response Callback **/
@@ -233,25 +394,29 @@ function pipeCallback(jsonString) {
 	addClickHandlers();
 	
 	drawGTableFromJSON(YPipeObj, 'jsontable');
+	currentTesterFunc();
 	//itemParser.parseJSON(YPipeObj.value.items);
 	
 	document.getElementById('loading').style.display = 'none'; //remove loading indicator
 	
 }
 
-function drawGTableFromJSON(json, outputDiv) {
+function drawTable(pip, outputDiv) {
 	
 	//Draw Google Viz
-	GoogleDataTable.init();
-	GoogleDataTable.makeColumns(json);
-	//GoogleDataTable.insertRows(YPipeObj);
-	//GoogleDataTable.fillColumns(json);
+	var dataT = new googleDataTable();
+	
+	dataT.makeColumns(pip);
+	dataT.makeRows(pip);
 	
 	// Create and draw the visualization.
 	visualization = new google.visualization.Table(document.getElementById(outputDiv));
-	visualization.draw(GoogleDataTable.JSONdata, {
+	visualization.draw(dataT.JSONdata, {
 			'allowHtml' : true
 		});
+		
+	//Displays control dashboard
+	ControlDashboard.propagateAttributeBoxes( dataT );
 	
 }
 
@@ -345,7 +510,7 @@ function propagateAttributes() {
 }
 
 // Gets the parameters from the input fields
-function GetParametersFromInput() {
+function GetParametersFromInputFields() {
 	
 	var param_names = document.getElementsByClassName("param_name"),
 	param_values = document.getElementsByClassName("param_value");
@@ -376,4 +541,6 @@ function checkType(type, obj) {
 	clas = Object.prototype.toString.call(obj).slice(8, -1);
 	return obj !== undefined && obj !== null && clas === type;
 }
+
+//Runs allways, put test code in here
  

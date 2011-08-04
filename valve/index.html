@@ -1,18 +1,17 @@
 <!DOCTYPE HTML>
 <html lang="en-US">
     <head>
-		<meta charset="UTF-8">
+        <meta name="generator" content="HTML Tidy for Windows (vers 14 February 2006), see www.w3.org">
+        <meta charset="UTF-8">
         <title>
             VALVE dashboard
-        </title>
-		<!--Load the AJAX API-->
-    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
-	
-	<!--Load the D3.js Vizualisation API-->
-	<script type="text/javascript" src="js/d3/d3.js"></script>
-	
+        </title><!--Load the AJAX API-->
 
-	
+        <script type="text/javascript" src="https://www.google.com/jsapi">
+</script><!--Load the D3.js Vizualisation API-->
+
+        <script type="text/javascript" src="js/d3/d3.js">
+</script>
         <script type="text/javascript" src="js/jquery.js">
 </script>
         <script type="text/javascript" src="js/jsonreport.js">
@@ -23,16 +22,13 @@
 </script>
         <script type="text/javascript" src="js/javascript.js">
 </script>
-		<script type="text/javascript" src="js/d3viz.js"></script>
-		<script type="text/javascript" src="js/chart.js"></script>
-
-
-
-
-
+        <script type="text/javascript" src="js/d3viz.js">
+</script>
+        <script type="text/javascript" src="js/chart.js">
+</script>
         <link rel="stylesheet" type="text/css" href="css/default.css">
         <link rel="stylesheet" type="text/css" href="css/jsonview.css">
-		<link rel="stylesheet" type="text/css" href="css/d3.css">
+        <link rel="stylesheet" type="text/css" href="css/d3.css">
     </head>
     <body>
         <div id="debug"></div>
@@ -46,37 +42,51 @@
                 <span class="show_hide">Parameters</span>
             </p>
             <p class="sliding">
-                <label>Parameter:</label> <input type="text" class="param_name" value="truncateAfter"> <label>Value:</label> <input type="text" class="param_value" value="5"> <span class="remove">Remove</span>
+                <label>Parameter:</label> <input type="text" class="param_name" value="truncateAfter"> <label>Value:</label> <input type="text" class="param_value" value="2"> <span class="remove">Remove</span>
             </p>
             <p class="sliding">
                 <span class="add">Add</span>
-            </p>
-			<br>
-            <input type="button" value="Import Pipe" onclick="pipeCall(inputurl)">
-			<div id="loading" style="display:none"><img id="loadingImage" src="img/ajax-loader.gif" alt="loadingImage" /></div>
-			<br /><input type="button" id="jsontableButton" value="test Function" onclick="testViz()"/>
+            </p><br>
+            <input type="button" value="Import Pipe" onclick="pipeCallCORS(inputurl)">
+            <div id="loading" style="display:none">
+                <img id="loadingImage" src="img/ajax-loader.gif" alt="loadingImage">
+            </div><br>
+            <input type="button" id="jsontableButton" value="test Function" onclick="testViz()">
         </form>
-        <div>
-            
-        </div>
-        
         <div class="slidingDiv jsonreport"></div>
         <h3>
             Json Output:
         </h3>
-        <div>The selected attribute is: <span id="selectedAttributes"></span></div>
-        <div id="jsondata"></div>
-		<div id="d3library">
-			<h4 style="color:orange">Google Chart Sandbox</h4>
-		</div>
-		<div>
-			<div>
-				<table id="jsontable"></table>
-			</div>
-			<!--Div that will hold the pie chart-->
-			<div id="chart_div"></div>
-
+        <div>
+            The selected attribute is: <span id="selectedAttributes"></span>
         </div>
-		
+		<div id="dashboard">
+			<h3>Control Dashboard</h3>
+			<form name="myform" action="" method="post">
+					<div align="center">
+						<label for="attr1dropdown">Attribute 1:</label>
+						<select id="attr1dropdown" name="attr1dropdown">
+						</select>
+						<label for="attr2dropdown">Attribute 2:</label>
+						<select id="attr2dropdown" name="attr2dropdown">
+						</select>
+					</div>
+			</form>
+		</div>
+        <div id="jsondata"></div>
+		<div id="CORSoutput"></div>
+        <div id="d3library">
+            <h4 style="color:orange">
+                Google Chart Sandbox
+            </h4>
+        </div>
+        <div>
+            
+            <div>
+                <table id="jsontable"></table>
+            </div><!--Div that will hold the pie chart-->
+            <div id="chart_div"></div>
+            <div id="querytable"></div>
+        </div>
     </body>
 </html>

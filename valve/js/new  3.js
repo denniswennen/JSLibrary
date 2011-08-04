@@ -122,3 +122,19 @@ function parseNum(m) {
 		}
 	
 	},
+	
+	addColumns : function (json) {
+		
+		var prop;
+		
+		if (checkType('Object', json) || checkType('Array', json)) { //json is an object, further parsing
+			for (prop in json) {
+				this.addColumns(json[prop]);
+				if (!checkType('Object', json[prop])) { //Objects cannot be used as data
+					//do something with the prop of the item
+					this.JSONdata.addColumn(typeof(prop), prop.toString(), prop.toString() + "column");
+				}
+			}
+		}
+		
+	},

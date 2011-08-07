@@ -10,48 +10,20 @@ google.load('visualization', '1', {
 		'packages' : ['corechart', 'table']
 	});
 
+var pipe1;
 
 //GLobal only item for representing the returned JSON object
-var YPipeObj = {
-	count : 0,
-	value : {
-		title : "", // name of the Yahoo Pipe
-		description : "", // description for the Pipe
-		link : "", //link to the pipe
-		pubDate : "", //The moment the Pipe output was created
-		generator : "", //Generator of the JSON data, mostly Yahoo pipes itself
-		callback : "", //function called to handle the JSON data
-		items : []// contains the list of items.
-	},
-	
-	params : {},
-	attributes : [],
-	
-	//representation of parameters
-	
-	setParam : function (key, val) {
-		this.params[key] = val;
-	},
-	
-	getParam : function (key) {
-		return param.key;
-	},
-	
-	getItems : function () {
-		return this.items;
-	},
-	
-	setItems : function (itemsArray) {
-		this.items = itemsArray;
-	},
-};
 
+// --------------  PRIVATE ATTR ---------------- 
 
 //UPDATED: pipe Object constructor
 function pipe(json) {
 
 	this.count = json.count;
 	this.value = json.value;
+	this.datatable = new googleDataTable();
+	this.params = {};
+	this.flatItems = []; //contain all the items with flattened objects
 	
 }
 
@@ -66,11 +38,16 @@ function googleDataTable() {
 googleDataTable.prototype.makeColumns = function (pipeObj) {
 		//code to fill the dataTable with all the items from the Pipe
 		//each row is an item. every parameter is added
-		var json = flatten( pipeObj.value.items[0] );
-		
+		var json = flatten( pipeObj.value.items[0] ),
+			clas;
+
+		//check for "null" datatypes
 		for (prop in json) {
-			this.JSONdata.addColumn(typeof(prop), prop.toString(), "col_" + prop.toString());
-			this.attributes.push(prop); // CHANGE PLACE?
+			clas = Object.prototype.toString.call(json[prop]).slice(8, -1).toLowerCase();
+			if( clas !== 'null' && clas !== 'undefined' ){
+				this.JSONdata.addColumn(clas, prop.toString(), "col_" + prop.toString());
+				this.attributes.push(prop); // CHANGE PLACE?
+			}
 		}
 }
 
@@ -87,136 +64,18 @@ googleDataTable.prototype.makeRows = function (pipeObj) {
 		for (itemNr = 0; itemNr < count; itemNr++) {
 			
 			flatItem = flatten(items[itemNr]); //flatten item
+			pipe1.flatItems.push( flatItem );
 			propNr = 0;
 			for (prop in flatItem) {
-				dataTable.setCell(itemNr, propNr, flatItem[prop] ? flatItem[prop] : "null");
-				propNr++;
+				if( flatItem[prop] !== null && flatItem[prop] !== undefined ) {
+					dataTable.setCell(itemNr, propNr, flatItem[prop]);
+					propNr++;
+				}
 			}
 		}
 
 }
 
-
-
-
-
-
-// Datastructure for the Google Data Table
-var GoogleDataTable = {
-	
-	init : function () {
-		this.JSONdata = new google.visualization.DataTable();
-	},
-	
-	makeColumns : function (pip) {
-		//code to fill the dataTable with all the items from the Pipe
-		//each row is an item. every parameter is added
-		// STILL SOME WORK. NOT ALL ATTRIBUTES ARE LOADED
-		var json = flatten( pip.value.items[0] );
-		
-		for (prop in json) {
-			this.JSONdata.addColumn(typeof(prop), prop.toString(), "col_" + prop.toString());
-			YPipeObj.attributes.push(prop); // CHANGE PLACE
-		}
-		
-	},
-	
-	makeRows : function (pipeJSON) {
-		
-		var dataTable = this.JSONdata,
-		items = pipeJSON.value.items,
-		count = pipeJSON.count,
-		itemNr,
-		propNr,
-		flatItem;
-		
-		dataTable.addRows(count); //first adds the rows in the DataTable
-		
-		for (itemNr = 0; itemNr < count; itemNr++) {
-			
-			flatItem = flatten(items[itemNr]); //flatten item
-			propNr = 0;
-			for (prop in flatItem) {
-				dataTable.setCell(itemNr, propNr, flatItem[prop] ? flatItem[prop] : "null");
-				propNr++;
-			}
-		}
-		
-	},
-	
-	fillCells : function (json, itemNr) {
-		var prop,
-		attrNr = 0;
-		
-		if (checkType('Object', json) || checkType('Array', json)) { //json is an object, further parsing
-			for (prop in json) {
-				this.fillCells(json[prop], itemNr, attrNr); // for objects at a deeper level
-				if (!checkType('Object', json[prop])) { //Objects cannot be used as data
-					//do something with the prop of the item
-					dataTable.setCell(itemNr, attrNr, val);
-					attrNr++;
-				}
-			}
-		}
-		
-	},
-	
-	fillColumns : function (pipeJSON) {
-		
-		var itemNr,
-		item,
-		obj,
-		val,
-		dataTable = this.JSONdata;
-		
-		dataTable.addRows(pipeJSON.count);
-		
-		for (itemNr = 0; itemNr < pipeJSON.count; itemNr++) {
-			
-			item = pipeJSON.value.items[itemNr]; //for each item
-			this.fillCells(item, itemNr);
-		}
-		
-		/** previous loop iteration with OBJECT String
-		for(var attr in item) {
-		el = item[attr];
-		if (typeof(el) == 'string' || typeof(el) =='number') {// for each attribute of the items
-		dataTable.setCell(currentItem, currentAttr, el);
-		currentAttr++;
-		}
-		else {
-		dataTable.setCell(currentItem, currentAttr, "[OBJECT]");
-		currentAttr++;
-		}
-		}**/
-		
-	},
-	
-	parseObj : function (obj) { //integrate the parse function here
-		if (typeof obj == 'number' || typeof obj == 'string') {
-			return obj;
-		} else {
-			return this.parseObj(obj);
-		}
-	},
-	
-	insertRows : function (pipeJSON) {
-		var i,
-		opt_cellArray = [],
-		pos,
-		firstItem = pipeJSON.value.items[0];
-		
-		for (var attr in firstItem) {
-			opt_cellArray.push(firstItem[attr]);
-		}
-		
-		for (i = 0; i < pipeJSON.count; i++) { //for every row
-			//addRow(opt_cellArray); //contains an Array with al the values for a specific row
-		};
-		
-	},
-	
-};
 
 // Controls the User interface
 var ControlDashboard = {
@@ -236,28 +95,6 @@ var ControlDashboard = {
 };
 // Loading functions
 // Parsing functions
-
-
-function flatten(json) {
-	var output = {},
-	walk = function (j) {
-		var jp;
-		for (var prop in j) {
-			jp = j[prop];
-			if (jp == null) {
-				output[prop] = jp;
-			} else {
-				if (jp.toString() === "[object Object]") {
-					walk(jp);
-				} else {
-					output[prop] = jp;
-				}
-			}
-		}
-	};
-	walk(json);
-	return output;
-}
 
 // Object functions
 /** convert the input url **/
@@ -281,35 +118,14 @@ function pipeCallScriptTag(inputURL) {
 	
 }
 
-function createCallbackURI(uri) {
-	
-	var fullUri,
-	paramObj,
-	str = '';
-	
-	GetParametersFromInputFields();
-	paramObj = YPipeObj.params;
-	for (var prop in paramObj) {
-		if (paramObj.hasOwnProperty(prop))
-			str += "&" + prop + "=" + paramObj[prop];
-	}
-	
-	fullUri = uri.value.replace("info", "run");
-	fullUri += "&_render=json";
-	fullUri += str;
-	fullUri += "&_callback=pipeCallback";
-	
-	return fullUri;
-}
-
 function createRequestURI(uri) {
 	
 	var fullUri,
 	paramObj,
 	str = '';
 	
-	GetParametersFromInputFields();
-	paramObj = YPipeObj.params;
+	paramObj = GetParametersFromInputFields();
+	
 	for (var prop in paramObj) {
 		if (paramObj.hasOwnProperty(prop))
 			str += "&" + prop + "=" + paramObj[prop];
@@ -331,9 +147,13 @@ function pipeCallCORS(inputURL) {
 	
 	if (request) {
 		request.onload = function () {
-			var r = JSON.parse(request.responseText); //the actual parsing from Yahoo Pipes to a JSON object
+			var r = JSON.parse(request.responseText, pipeReviver); //the actual parsing from Yahoo Pipes to a Javascript object
 			//do something with the returned JSON object 'r'
-			processResponse( r );
+			if( r.count != 0 ) {
+				processResponse( r );
+				console.log ( "Pipe URL: " + createRequestURI(inputURL) );
+				debug( r.count );
+			}
 			
 			
 		};
@@ -342,19 +162,6 @@ function pipeCallCORS(inputURL) {
 	
 
 }
-
-function processResponse(response) {
-
-	var pipe1 = new pipe(response);
-	
-	//Displays Google Data Table
-	drawTable(pipe1, 'jsontable');
-	
-	
-	document.getElementById('loading').style.display = 'none'; //remove loading indicator
-
-}
-
 
 function createCORSRequest(method, url) {
 	var xhr = new XMLHttpRequest();
@@ -370,22 +177,18 @@ function createCORSRequest(method, url) {
 	return xhr;
 }
 
-/** Handles the Pipe response Callback **/
-function pipeCallback(jsonString) {
-	var output;
+// Handles the Pipe response Callback
+function processResponse(response) {
+
+	pipe1 = new pipe(response);
 	
-	YPipeObj.count = jsonString.count;
-	YPipeObj.value = jsonString.value;
-	
-	debug(jsonString.count);
-	
-	//output = val(response);
-	//document.getElementById('attributeslist').innerHTML = output;
+	//Displays Google Data Table
+	drawTable(pipe1, 'jsontable');
 	
 	this.jsonFormatter = new JSONFormatter();
 	
 	try {
-		outputDoc = this.jsonFormatter.jsonToHTML(jsonString, this.uri);
+		outputDoc = this.jsonFormatter.jsonToHTML(pipe1.value, this.uri);
 	} catch (e) {
 		outputDoc = this.jsonFormatter.errorPage(e, this.data, this.uri);
 	}
@@ -393,12 +196,9 @@ function pipeCallback(jsonString) {
 	document.getElementById('jsondata').innerHTML = outputDoc;
 	addClickHandlers();
 	
-	drawGTableFromJSON(YPipeObj, 'jsontable');
-	currentTesterFunc();
-	//itemParser.parseJSON(YPipeObj.value.items);
 	
 	document.getElementById('loading').style.display = 'none'; //remove loading indicator
-	
+
 }
 
 function drawTable(pip, outputDiv) {
@@ -409,10 +209,12 @@ function drawTable(pip, outputDiv) {
 	dataT.makeColumns(pip);
 	dataT.makeRows(pip);
 	
+	pipe1.datatable = dataT;
+	
 	// Create and draw the visualization.
 	visualization = new google.visualization.Table(document.getElementById(outputDiv));
 	visualization.draw(dataT.JSONdata, {
-			'allowHtml' : true
+			'allowHtml' : true,
 		});
 		
 	//Displays control dashboard
@@ -420,82 +222,34 @@ function drawTable(pip, outputDiv) {
 	
 }
 
+function drawExampleChart() {
+
+	//raw data
+	var dataTable,
+		dataView,
+		chart,
+		colNumbers = [];
+		
+
+	//perform query, select the data used from the attributeboxes
+	colNumbers.push (document.getElementById('attr1dropdown').selectedIndex );
+	colNumbers.push (document.getElementById('attr2dropdown').selectedIndex );
+	
+	dataTable = pipe1.datatable.JSONdata;
+	dataView = new google.visualization.DataView(dataTable);
+	dataView.setColumns( colNumbers );
+	
+	chart = new google.visualization.ColumnChart(document.getElementById('visualization'));
+	chart.draw(dataView, {width: 900, height: 300});
+	
+}
+
+
 //-------------------------------------------------------------------------------------------------
 // Parsing Items
-function val(m) {
-	if (m == null)
-		return '';
-	if (typeof m == 'number')
-		return num(m);
-	if (typeof m == 'string')
-		return str(m);
-	if (typeof m == 'boolean')
-		return m ? 'true' : 'false';
-	return m.length ? arr(m) : obj(m);
-}
 
-function obj(m) {
-	var sb = '<dl>';
-	for (var k in m) {
-		sb += '<dt class="ib"><b>' + splitCase(k) + '</b></dt><dd>' + val(m[k]) + '</dd>';
-	}
-	sb += '</dl>';
-	return sb;
-}
 
-function arr(m) {
-	val(m);
-}
 
-function arr2(m) {
-	var len = m.length,
-	sb = '<ul>',
-	i;
-	
-	if (typeof m[0] == 'string' || typeof m[0] == 'number') {
-		return m.join(', ');
-	}
-	
-	for (i = 0; i < len; i++) {
-		sb += '<li>' + m[i] + '</li>';
-	}
-	
-	sb += '</ul>'
-	
-	return sb;
-}
-
-function makeRows(h, m) {
-	var sb = '';
-	for (var r = 0, len = m.length; r < len; r++) {
-		sb += '<tr>';
-		var row = m[r];
-		sb += '<td>' + r + '</td>';
-		for (var k in h)
-			sb += '<td>' + val(row[k]) + '</td>';
-		sb += '</tr>';
-	}
-	return sb;
-}
-
-function num(m) {
-	return m;
-}
-function str(m) {
-	return m.substr(0, 6) == '/Date(' ? dfmt(date(m)) : m;
-}
-function date(s) {
-	return new Date(parseFloat(/Date\(([^)]+)\)/.exec(s)[1]));
-}
-function pad(d) {
-	return d < 10 ? '0' + d : d;
-}
-function dfmt(d) {
-	return d.getFullYear() + '/' + pad(d.getMonth() + 1) + '/' + pad(d.getDate());
-}
-function splitCase(t) {
-	return typeof t != 'string' ? t : t.replace(/([A-Z]|[0-9]+)/g, ' $1').replace(/_/g, ' ');
-}
 
 // Utility functions
 
@@ -513,15 +267,22 @@ function propagateAttributes() {
 function GetParametersFromInputFields() {
 	
 	var param_names = document.getElementsByClassName("param_name"),
-	param_values = document.getElementsByClassName("param_value");
+		param_values = document.getElementsByClassName("param_value"),
+		paramObj = {},
+		i;
 	
-	for (var i = 0; i < param_names.length; i++) {
-		if (param_names[i].value != '' && param_values[i].value != '') {
-			//paramObj[param_names[i].value] = param_values[i].value;
-			YPipeObj.setParam(param_names[i].value, param_values[i].value);
+	
+	for (i = 0; i < param_names.length; i++) {
+		var key = param_names[i].value,
+			value = param_values[i].value;
+			
+		if (key != '' && value != '') {
+			paramObj[key] = value;
 			
 		}
 	}
+	
+	return paramObj;
 }
 
 /** Prints out debug variable **/
@@ -535,12 +296,96 @@ function debug(variable) {
 	}
 }
 
-function checkType(type, obj) {
+function typeCheck(type, obj) {
 	var clas;
 	
 	clas = Object.prototype.toString.call(obj).slice(8, -1);
 	return obj !== undefined && obj !== null && clas === type;
 }
 
-//Runs allways, put test code in here
+// Converts the value of an object's key into the type of the given type argument
+function typeConvert(type, obj) {
+	
+	if( 'Boolean' == type ) { return ( obj == "true" ? true : false ); }
+	
+	if ('String' == type ) { return obj = String(obj); }
+	
+	if ('Number' == type ) { return parseInt(obj, 10); }
+	
+
+	
+}
+
+function convert() {
+	
+	var pipe,
+		items,
+		key,
+		type,
+		i,
+		outputDoc;
+	
+	pipe = pipe1;
+	items = pipe.flatItems;
+	key = GetSelectedValue('attr1dropdown'),
+	type = GetSelectedValue('conversionType');
+	
+	for(i=0;i<items.length;i++) {
+		items[i][key] = typeConvert( type, items[i][key] ); 
+	}
+	
+	pipe.flatItems = items;
+	
+	try {
+		outputDoc = this.jsonFormatter.jsonToHTML(items, this.uri);
+	} 
+	catch (e) {
+		outputDoc = this.jsonFormatter.errorPage(e, this.data, this.uri);
+	}
+	
+	document.getElementById('jsondata').innerHTML = outputDoc;
+	addClickHandlers();
+	
+}
+//Examines the JSON string and converts it into the right JavaScript data type
+function pipeReviver(key, value) {
+
+	var d = new Date(),
+		numbers = ['count', 'milliseconds', 'year', 'month', 'day', 'hour', 'minute', 'second', 'millisecond'];
+	
+	if ("object" === typeof value) { return value; }
+	
+	else if ( numbers.indexOf(key) >= 0 ) { 
+		return +value;
+	}
+	
+	else if (key === "pubDate") { 
+		return new Date(value);
+	}
+	
+	return value;
+}
+
+// Creates a linear object from a structered object
+function flatten(json) {
+	var output = {},
+	walk = function (j) {
+		var jp;
+		for (var prop in j) {
+			jp = j[prop];
+			if (jp == null) {
+				output[prop] = jp;
+			} else {
+				if (jp.toString() === "[object Object]") {
+					walk(jp);
+				} else {
+					output[prop] = jp;
+				}
+			}
+		}
+	};
+	walk(json);
+	return output;
+}
+
  

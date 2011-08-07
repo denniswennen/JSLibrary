@@ -89,8 +89,15 @@ function addClickHandlers() {
 		}
 	}
 	
-	//Function executed when an attribute is clicked
 	function Clicker(evt) {
+	
+		var newAttr = evt.target.innerHTML;
+		document.getElementById("selectedAttributes").innerHTML = newAttr;
+		
+	}
+	
+	// (previous) Function executed when an attribute is clicked
+	function Clicker2(evt) {
 	
 		var newAttr = evt.target.innerHTML,
 			currentAttr = document.getElementById('selectedAttributes').innerHTML.split(" | ",1);
@@ -102,5 +109,11 @@ function addClickHandlers() {
 	for (i = 0; i < items.length; i++) {
 		items[i].addEventListener('click', Clicker, false)
 	}
+}
+
+function GetSelectedValue(selectItem)
+{
+    var index = document.getElementById(selectItem).selectedIndex;
+    return document.getElementById(selectItem).options[index].text;
 }
  

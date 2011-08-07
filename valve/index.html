@@ -36,7 +36,7 @@
         <div id="input"></div>
         <form action="">
             <p>
-                <label for="inputurl" id="labelurl">Pipe URL</label> <input type="text" name="inputurl" id="inputurl" size="100" value="http://pipes.yahoo.com/pipes/pipe.info?_id=45ac0c6883a348080eaa4522ff10e9e7" class="text-input"><br>
+                <label for="inputurl" id="labelurl">Pipe URL</label> <input type="text" name="inputurl" id="inputurl" size="100" value="http://pipes.yahoo.com/pipes/pipe.info?_id=7a31ec30311b205544ee744b872f4417" class="text-input"><br>
             </p>
             <p>
                 <span class="show_hide">Parameters</span>
@@ -57,36 +57,37 @@
         <h3>
             Json Output:
         </h3>
-        <div>
-            The selected attribute is: <span id="selectedAttributes"></span>
-        </div>
 		<div id="dashboard">
 			<h3>Control Dashboard</h3>
 			<form name="myform" action="" method="post">
 					<div align="center">
 						<label for="attr1dropdown">Attribute 1:</label>
-						<select id="attr1dropdown" name="attr1dropdown">
-						</select>
+						<select id="attr1dropdown" name="attr1dropdown"></select>
 						<label for="attr2dropdown">Attribute 2:</label>
-						<select id="attr2dropdown" name="attr2dropdown">
+						<select id="attr2dropdown" name="attr2dropdown"></select>
+						<input type="button" value="Draw Chart" onclick="drawExampleChart()">
+					</div>
+					<div align="center">
+						<label for="conversionType">Type: </label>
+						<select id="conversionType" name="conversionType">
+							<option>Number</option>
+							<option>String</option>
+							<option>Boolean</option>
 						</select>
+						<input type="button" value="Convert Attribute 1" onclick="convert()">
 					</div>
 			</form>
 		</div>
         <div id="jsondata"></div>
 		<div id="CORSoutput"></div>
-        <div id="d3library">
+        <div>
             <h4 style="color:orange">
                 Google Chart Sandbox
             </h4>
-        </div>
-        <div>
-            
-            <div>
-                <table id="jsontable"></table>
-            </div><!--Div that will hold the pie chart-->
-            <div id="chart_div"></div>
-            <div id="querytable"></div>
-        </div>
+			<div id="visualization"></div>
+			<div><table id="jsontable"></table></div><!--Div that will hold the pie chart-->
+			<div id="chart_div"></div>
+			<div id="querytable"></div>
+		</div>
     </body>
 </html>

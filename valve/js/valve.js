@@ -20,8 +20,8 @@ var pipe1;
 function pipe(json) {
 
 	this.count = json.count;
-	this.value = json.value;
-	this.datatable = new googleDataTable();
+	this.value = json.value; // original value parsed from the JSON strike
+	this.gTable = new googleDataTable();
 	this.params = {};
 	this.flatItems = []; //contain all the items with flattened objects
 	
@@ -31,49 +31,98 @@ function pipe(json) {
 
 // GOOGLE DATA TABLE FUNCTIONS
 function googleDataTable() {
-	this.JSONdata = new google.visualization.DataTable();
+	this.data = new google.visualization.DataTable();
 	this.attributes = [];
 }
 
-googleDataTable.prototype.makeColumns = function (pipeObj) {
-		//code to fill the dataTable with all the items from the Pipe
-		//each row is an item. every parameter is added
-		var json = flatten( pipeObj.value.items[0] ),
+//takes an object, makes it flat so it is 1 object with properties. All this properties are converted into Google Data Table columns
+googleDataTable.prototype.setColumns = function (obj) {
+		var flatObj = flatten( obj ),
 			clas;
 
 		//check for "null" datatypes
-		for (prop in json) {
-			clas = Object.prototype.toString.call(json[prop]).slice(8, -1).toLowerCase();
+		for (prop in flatObj) {
+			clas = Object.prototype.toString.call(flatObj[prop]).slice(8, -1).toLowerCase();
 			if( clas !== 'null' && clas !== 'undefined' ){
-				this.JSONdata.addColumn(clas, prop.toString(), "col_" + prop.toString());
+				this.data.addColumn(clas, prop.toString(), "col_" + prop.toString());
 				this.attributes.push(prop); // CHANGE PLACE?
 			}
 		}
 }
 
-googleDataTable.prototype.makeRows = function (pipeObj) {
-		var dataTable = this.JSONdata,
-		items = pipeObj.value.items,
-		count = pipeObj.count,
-		itemNr,
+// input: flat Array which contains all the items, each item is an object
+googleDataTable.prototype.fillColumns = function (dataArray) {
+		var dataTable = this.data,
+		//items = pipeObj.value.items,
+		count = dataArray.length,
+		i,
 		propNr,
-		flatItem;
+		tempObj;
 		
 		dataTable.addRows(count); //first adds the rows in the DataTable
 		
-		for (itemNr = 0; itemNr < count; itemNr++) {
-			
-			flatItem = flatten(items[itemNr]); //flatten item
-			pipe1.flatItems.push( flatItem );
+		for (i = 0; i < count; i++) {
 			propNr = 0;
-			for (prop in flatItem) {
-				if( flatItem[prop] !== null && flatItem[prop] !== undefined ) {
-					dataTable.setCell(itemNr, propNr, flatItem[prop]);
+			tempObj = dataArray[i];
+			for (prop in tempObj) {
+				if( tempObj[prop] !== null && tempObj[prop] !== undefined ) {
+					dataTable.setCell(i, propNr, tempObj[prop]);
 					propNr++;
 				}
 			}
 		}
 
+}
+
+pipe.prototype.initDataTable = function () {
+
+	var pipeItems,
+		pipeItemsLength;
+	
+	this.gTable.setColumns(this.value.items[0]);
+	
+	pipeItems = this.value.items;
+	pipeItemsLength = pipeItems.length;
+	
+	for( i=0; i<pipeItemsLength; i++ ) {
+		this.flatItems.push( flatten( pipeItems[i] ) );
+	}
+	
+	this.gTable.fillColumns(this.flatItems);
+	
+}
+
+pipe.prototype.updateDataTable = function() {
+
+	var items,
+		itemsLength;
+	
+	this.gTable = new googleDataTable();
+	this.gTable.setColumns(this.flatItems[0]);
+	
+	for( i=0; i<itemsLength; i++ ) {
+		this.flatItems.push( flatten( pipeItems[i] ) );
+	}
+	
+	this.gTable.fillColumns(this.flatItems);
+
+}
+
+//User input the attribute name and get an array with all the values back
+pipe.prototype.getAttributeData = function(attrName) {
+
+	var arr = [],
+		items,
+		itemsLength;
+		
+	items = this.flatItems;
+	itemsLength = this.flatItems.length;
+	
+	for( i=0; i<itemsLength; i++ ) {
+		arr.push( items[i][attrName] );
+	}
+	
+	return arr;
 }
 
 
@@ -201,24 +250,22 @@ function processResponse(response) {
 
 }
 
-function drawTable(pip, outputDiv) {
+function drawTable(pipeObj, outputDiv) {
 	
-	//Draw Google Viz
-	var dataT = new googleDataTable();
-	
-	dataT.makeColumns(pip);
-	dataT.makeRows(pip);
-	
-	pipe1.datatable = dataT;
+	//Inits the Google Data Table (property of the pipe obj) for the 1st time
+	pipeObj.initDataTable();
 	
 	// Create and draw the visualization.
 	visualization = new google.visualization.Table(document.getElementById(outputDiv));
-	visualization.draw(dataT.JSONdata, {
+	visualization.draw(pipeObj.gTable.data, {
 			'allowHtml' : true,
 		});
 		
 	//Displays control dashboard
-	ControlDashboard.propagateAttributeBoxes( dataT );
+	ControlDashboard.propagateAttributeBoxes( pipeObj.gTable );
+	
+	
+	//var a = pipeObj.getAttributeData("RefName");
 	
 }
 
@@ -235,7 +282,7 @@ function drawExampleChart() {
 	colNumbers.push (document.getElementById('attr1dropdown').selectedIndex );
 	colNumbers.push (document.getElementById('attr2dropdown').selectedIndex );
 	
-	dataTable = pipe1.datatable.JSONdata;
+	dataTable = pipe1.gTable.data;
 	dataView = new google.visualization.DataView(dataTable);
 	dataView.setColumns( colNumbers );
 	
@@ -245,14 +292,8 @@ function drawExampleChart() {
 }
 
 
-//-------------------------------------------------------------------------------------------------
-// Parsing Items
-
-
-
 
 // Utility functions
-
 function propagateAttributes() {
 	var dropdownbox = document.getElementById('attributelist');
 	
@@ -285,7 +326,7 @@ function GetParametersFromInputFields() {
 	return paramObj;
 }
 
-/** Prints out debug variable **/
+// Prints out debug variable
 function debug(variable) {
 	var outputdiv = document.getElementById('debug');
 	if (variable === null) {
@@ -316,17 +357,16 @@ function typeConvert(type, obj) {
 	
 }
 
-function convert() {
+
+function convertData() {
 	
-	var pipe,
-		items,
+	var items,
 		key,
 		type,
 		i,
 		outputDoc;
-	
-	pipe = pipe1;
-	items = pipe.flatItems;
+		
+	items = pipe1.flatItems;
 	key = GetSelectedValue('attr1dropdown'),
 	type = GetSelectedValue('conversionType');
 	
@@ -334,7 +374,9 @@ function convert() {
 		items[i][key] = typeConvert( type, items[i][key] ); 
 	}
 	
-	pipe.flatItems = items;
+	pipe1.flatItems = items;
+	
+	pipe1.updateDataTable();
 	
 	try {
 		outputDoc = this.jsonFormatter.jsonToHTML(items, this.uri);
@@ -351,7 +393,7 @@ function convert() {
 function pipeReviver(key, value) {
 
 	var d = new Date(),
-		numbers = ['count', 'milliseconds', 'year', 'month', 'day', 'hour', 'minute', 'second', 'millisecond'];
+		numbers = ['count', 'milliseconds', 'year', 'month', 'day', 'hour', 'minute', 'second', 'millisecond', 'day_of_week'];
 	
 	if ("object" === typeof value) { return value; }
 	
@@ -367,7 +409,7 @@ function pipeReviver(key, value) {
 }
 
 // Creates a linear object from a structered object
-function flatten(json) {
+function flatten(obj) {
 	var output = {},
 	walk = function (j) {
 		var jp;
@@ -384,7 +426,7 @@ function flatten(json) {
 			}
 		}
 	};
-	walk(json);
+	walk(obj);
 	return output;
 }
 

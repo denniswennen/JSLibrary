@@ -34,10 +34,30 @@
         <div id="debug"></div>
         <div id="test"></div>
         <div id="input"></div>
-        <form action="">
-            <p>
-                <label for="inputurl" id="labelurl">Pipe URL</label> <input type="text" name="inputurl" id="inputurl" size="100" value="http://pipes.yahoo.com/pipes/pipe.info?_id=7a31ec30311b205544ee744b872f4417" class="text-input"><br>
+		
+		<form id="paramForm" action="">
+			<p>
+                <label for="inputurl" id="labelurl">Pipe URL</label> <input type="text" name="inputurl" id="inputurl" size="100" value="http://pipes.yahoo.com/pipes/pipe.info?_id=f7ce5f42573f2aba3aa11fb99a38c66d" class="text-input"><br>
             </p>
+			<div id="emptydiv"></div>
+			<!--
+			<div id="input1" style="margin-bottom:4px" class="clonedInput">
+			Parameter: <input type="text" name="param1" id="param1" /> 
+			Value: <input type="text" name="value1" id="value1" />
+			</div>
+			-->
+			<div>
+				<input type="button" id="btnAdd" value="add parameter" />
+				<input type="button" id="btnDel" value="remove parameter" />
+				<input type="button" value="Import Pipe" onclick="pipeCallCORS(inputurl)">
+				<div id="loading" style="display:none">
+                <img id="loadingImage" src="img/ajax-loader.gif" alt="loadingImage">
+            </div><br>
+            <input type="button" id="jsontableButton" value="test Viz" onclick="testViz()">			
+		</form>
+		
+        <form action="">
+            
             <p>
                 <span class="show_hide">Parameters</span>
             </p>
@@ -47,12 +67,9 @@
             <p class="sliding">
                 <span class="add">Add</span>
             </p><br>
-            <input type="button" value="Import Pipe" onclick="pipeCallCORS(inputurl)">
-            <div id="loading" style="display:none">
-                <img id="loadingImage" src="img/ajax-loader.gif" alt="loadingImage">
-            </div><br>
-            <input type="button" id="jsontableButton" value="test Function" onclick="testViz()">
+            
         </form>
+		
         <div class="slidingDiv jsonreport"></div>
         <h3>
             Json Output:
@@ -74,12 +91,10 @@
 							<option>String</option>
 							<option>Boolean</option>
 						</select>
-						<input type="button" value="Convert Attribute 1" onclick="convert()">
+						<input type="button" value="Convert Attribute 1" onclick="convertData()">
 					</div>
 			</form>
 		</div>
-        <div id="jsondata"></div>
-		<div id="CORSoutput"></div>
         <div>
             <h4 style="color:orange">
                 Google Chart Sandbox
@@ -89,5 +104,7 @@
 			<div id="chart_div"></div>
 			<div id="querytable"></div>
 		</div>
+		<div id="jsondata"></div>
+		<div id="CORSoutput"></div>
     </body>
 </html>

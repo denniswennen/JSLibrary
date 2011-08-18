@@ -10,6 +10,9 @@ google.load('visualization', '1', {
 		'packages' : ['corechart', 'table', 'charteditor']
 	});
 
+	
+var json3 = { "d": "[{\"Id\":1,\"UserName\":\"Sam Smith\"},{\"Id\":2,\"UserName\":\"Fred Frankly\"},{\"Id\":1,\"UserName\":\"Zachary Zupers\"}]" }
+
 var pipe1,
 	wrapper;
 	pipelist = {
@@ -85,12 +88,10 @@ googleDataTable.prototype.fillColumns = function (dataArray) {
 	
 }
 
-pipe.prototype.initDataTable = function () {
-	
+pipe.prototype.flatten_data = function () {
+
 	var pipeItems,
-	pipeItemsLength;
-	
-	this.gTable.setColumns(this.value.items[0]);
+		pipeItemsLength;
 	
 	pipeItems = this.value.items;
 	pipeItemsLength = pipeItems.length;
@@ -98,7 +99,13 @@ pipe.prototype.initDataTable = function () {
 	for (i = 0; i < pipeItemsLength; i++) {
 		this.flatItems.push(flatten(pipeItems[i]));
 	}
+
+
+}
+
+pipe.prototype.initDataTable = function () {
 	
+	this.gTable.setColumns(this.value.items[0]);
 	this.gTable.fillColumns(this.flatItems);
 	
 }
@@ -323,22 +330,27 @@ function set_pipe_parameters(o) {
 	
 }
 
-function createRequestURI(uri) {
+function createRequestURI(id) {
 	
 	var fullUri,
 	paramObj,
+	paramList,
+	param_values,
 	rendertype,
+	uri,
 	str = '';
 	
-	paramObj = GetParametersFromInputFields();
+	uri = pipelist[id].url;
+	//paramObj = GetParametersFromInputFields();
+	paramList = pipelist[id].params;
 	rendertype = getRenderType();
+	param_values = document.getElementsByClassName("param_value")
 	
-	for (var prop in paramObj) {
-		if (paramObj.hasOwnProperty(prop))
-			str += "&" + prop + "=" + paramObj[prop];
+	for (i=0; i< paramList.length; i++) {
+			str += "&" + paramList[i].name + "=" + param_values[i].value;
 	}
 	
-	fullUri = uri.value.replace("info", "run");
+	fullUri = uri.replace("info", "run");
 	fullUri += "&_render=",
 	fullUri += rendertype;
 	fullUri += str;
@@ -347,12 +359,17 @@ function createRequestURI(uri) {
 	return fullUri;
 }
 
-function pipeCallCORS(inputURL) {
+function pipeCallCORS() {
 	
 	var request,
-	renderType;
+	renderType,
+	id,
+	inputurl;
 	
-	request = createCORSRequest("get", createRequestURI(inputURL));
+	id = GetSelectedValue('pipelist');
+	
+	
+	request = createCORSRequest("get", createRequestURI( id ));
 	renderType = getRenderType();
 	
 	document.getElementById('loading').style.display = 'inline';
@@ -365,7 +382,7 @@ function pipeCallCORS(inputURL) {
 				//do something with the returned JSON object 'r'
 				if (r.count != 0) {
 					processJSONResponse(r);
-					console.log("Pipe URL: " + createRequestURI(inputURL));
+					//console.log("Pipe URL: " + createRequestURI(inputURL));
 					debug(r.count);
 				}
 			} else if (rendertype == "kml") {
@@ -396,9 +413,14 @@ function createCORSRequest(method, url) {
 function processJSONResponse(response) {
 	
 	pipe1 = new pipe(response);
+	pipe1.flatten_data();
+	
+	
+	//CREATING ALL THE DATA TABLES
+	$('#DynamicGrid').append(CreateTableView( pipe1.flatItems , "lightPro", true)).fadeIn();
 	
 	//Displays Google Data Table
-	drawTable(pipe1, 'jsontable');
+	//drawTable(pipe1, 'jsontable');
 	
 	this.jsonFormatter = new JSONFormatter();
 	
@@ -418,6 +440,7 @@ function processJSONResponse(response) {
 function drawTable(pipeObj, outputDiv) {
 	
 	//Inits the Google Data Table (property of the pipe obj) for the 1st time
+	pipeObj.flatten_data();
 	pipeObj.initDataTable();
 	
 	// Create and draw the visualization.
@@ -535,6 +558,25 @@ function GetParametersFromInputFields() {
 	i;
 	
 	for (i = 0; i < param_names.length; i++) {
+		var key = param_names[i].value,
+		value = param_values[i].value;
+		
+		if (key != '' && value != '') {
+			paramObj[key] = value;
+			
+		}
+	}
+	
+	return paramObj;
+}
+
+function get_parameter_value_from_input() {
+	
+	var param_values = document.getElementsByClassName("param_value"),
+	paramObj = [],
+	i;
+	
+	for (i = 0; i < param_values.length; i++) {
 		var key = param_names[i].value,
 		value = param_values[i].value;
 		

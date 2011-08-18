@@ -3,6 +3,7 @@ $(document).ready(function () {
 		//INIT onLoad
 		$("#btnDel").hide();
 		createPipeList();
+		$('#DynamicGridLoading').hide();
 		
 		
 		$('.show_hide').click(function () {

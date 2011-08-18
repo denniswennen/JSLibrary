@@ -1,10 +1,15 @@
 $(document).ready(function () {
 		
-		//$(".sliding").hide();
+		//INIT onLoad
 		$("#btnDel").hide();
+		
 		
 		$('.show_hide').click(function () {
 				$(".sliding").slideToggle();
+			});
+			
+		$('.mapslider').click(function () {
+				$(".slidingmap").slideToggle();
 			});
 		
 		$(".add").click(function () {
@@ -24,10 +29,8 @@ $(document).ready(function () {
 				
 				if (num == 0) {
 					// create the new element via clone(), and manipulate it's ID using newNum value
-					var newElem = $('<div id="input1" style="margin-bottom:4px" class="clonedInput">Parameter: <input type="text" class="param_name" name="name1" id="name1" /> Value: <input type="text" class="param_value" name="value1" id="value1" /></div>').appendTo( $('#emptydiv') );
-				}
-				
-				else {
+					var newElem = $('<div id="input1" style="margin-bottom:4px" class="clonedInput">Parameter: <input type="text" class="param_name" name="name1" id="name1" /> Value: <input type="text" class="param_value" name="value1" id="value1" /></div>').appendTo($('#emptydiv'));
+				} else {
 					// create the new element via clone(), and manipulate it's ID using newNum value
 					var newElem = $('#input' + num).clone().attr('id', 'input' + newNum);
 					
@@ -40,7 +43,7 @@ $(document).ready(function () {
 				}
 				
 				// enable the "remove" button
-				if( num == 0 ) {
+				if (num == 0) {
 					$("#btnDel").slideToggle();
 				}
 			});
@@ -53,9 +56,6 @@ $(document).ready(function () {
 				if (num == 1)
 					$("#btnDel").slideToggle();
 			});
-		
-		
-		
 		
 	});
 
@@ -153,6 +153,18 @@ function addClickHandlers() {
 function GetSelectedValue(selectItem) {
 	var index = document.getElementById(selectItem).selectedIndex;
 	return document.getElementById(selectItem).options[index].text;
+}
+
+function getRenderType() {
+	
+	var radios = document.getElementById("paramForm").pipetype;
+	for (var i = 0; i < radios.length; i++) {
+		if (radios[i].checked) {
+			var rad_val = radios[i].value;
+		}
+	}
+	
+	return rad_val;
 }
 
  

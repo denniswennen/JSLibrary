@@ -1,16 +1,14 @@
-<!DOCTYPE HTML>
+<!DOCTYPE html>
 <html lang="en-US">
     <head>
         <meta name="generator" content="HTML Tidy for Windows (vers 14 February 2006), see www.w3.org">
         <meta charset="UTF-8">
+		<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
         <title>
             VALVE dashboard
         </title><!--Load the AJAX API-->
 
         <script type="text/javascript" src="https://www.google.com/jsapi">
-</script><!--Load the D3.js Vizualisation API-->
-
-        <script type="text/javascript" src="js/d3/d3.js">
 </script>
         <script type="text/javascript" src="js/jquery.js">
 </script>
@@ -18,71 +16,57 @@
 </script>
         <script type="text/javascript" src="js/jsonviewmod.js">
 </script>
-        <script type="text/javascript" src="js/valve.js">
-</script>
         <script type="text/javascript" src="js/javascript.js">
 </script>
+
+        <script type="text/javascript" src="js/valve.js">
+</script>
+
         <script type="text/javascript" src="js/d3viz.js">
 </script>
         <script type="text/javascript" src="js/chart.js">
 </script>
         <link rel="stylesheet" type="text/css" href="css/default.css">
-        <link rel="stylesheet" type="text/css" href="css/jsonview.css">
+        <link rel="stylesheet" type="text/css" href="css/jsonview.css"> 
         <link rel="stylesheet" type="text/css" href="css/d3.css">
     </head>
     <body>
         <div id="debug"></div>
         <div id="test"></div>
+		
         <div id="input"></div>
 		
+		
+		<div>
 		<form id="paramForm" action="">
 			<p>
-                <label for="inputurl" id="labelurl">Pipe URL</label> <input type="text" name="inputurl" id="inputurl" size="100" value="http://pipes.yahoo.com/pipes/pipe.info?_id=f7ce5f42573f2aba3aa11fb99a38c66d" class="text-input"><br>
+                <label for="inputurl" id="labelurl">Pipe URL</label> <input type="text" name="inputurl" id="inputurl" size="100" value="http://pipes.yahoo.com/pipes/pipe.info?_id=7a31ec30311b205544ee744b872f4417" class="text-input">
+				<input type="radio" name="pipetype" value="json" checked="checked"> JSON
+				<input type="radio" name="pipetype" value="kml"> KML<br>
             </p>
 			<div id="emptydiv"></div>
-			<!--
-			<div id="input1" style="margin-bottom:4px" class="clonedInput">
-			Parameter: <input type="text" name="param1" id="param1" /> 
-			Value: <input type="text" name="value1" id="value1" />
-			</div>
-			-->
 			<div>
 				<input type="button" id="btnAdd" value="add parameter" />
 				<input type="button" id="btnDel" value="remove parameter" />
-				<input type="button" value="Import Pipe" onclick="pipeCallCORS(inputurl)">
+				<input type="button" value="Import Pipe" onclick='pipeCallCORS(inputurl), createYQLscriptTag("f7ce5f42573f2aba3aa11fb99a38c66d")'>
 				<div id="loading" style="display:none">
-                <img id="loadingImage" src="img/ajax-loader.gif" alt="loadingImage">
-            </div><br>
-            <input type="button" id="jsontableButton" value="test Viz" onclick="testViz()">			
+					<img id="loadingImage" src="img/ajax-loader.gif" alt="loadingImage">
+				</div><br>
+				<input type="button" id="testbutton" value="Maps Init" onclick="loadGoogleMapsAPI()">
+			</div>
 		</form>
+		</div>
+		<p><span class="show_hide">Show/hide data</span></p>
 		
-        <form action="">
-            
-            <p>
-                <span class="show_hide">Parameters</span>
-            </p>
-            <p class="sliding">
-                <label>Parameter:</label> <input type="text" class="param_name" value="truncateAfter"> <label>Value:</label> <input type="text" class="param_value" value="2"> <span class="remove">Remove</span>
-            </p>
-            <p class="sliding">
-                <span class="add">Add</span>
-            </p><br>
-            
-        </form>
-		
-        <div class="slidingDiv jsonreport"></div>
-        <h3>
-            Json Output:
-        </h3>
 		<div id="dashboard">
 			<h3>Control Dashboard</h3>
-			<form name="myform" action="" method="post">
+			<form name="myform" action="" method="">
 					<div align="center">
 						<label for="attr1dropdown">Attribute 1:</label>
 						<select id="attr1dropdown" name="attr1dropdown"></select>
 						<label for="attr2dropdown">Attribute 2:</label>
 						<select id="attr2dropdown" name="attr2dropdown"></select>
-						<input type="button" value="Draw Chart" onclick="drawExampleChart()">
+						<input type="button" value="Draw Chart" onclick="draw()">
 					</div>
 					<div align="center">
 						<label for="conversionType">Type: </label>
@@ -94,17 +78,33 @@
 						<input type="button" value="Convert Attribute 1" onclick="convertData()">
 					</div>
 			</form>
+			<h4>List of attributes:</h4>
+			<div id="datatypes"></div>
 		</div>
+		
+		<div class="sliding">
+			<h3>Json Output:</h3>
+			<div id="jsondata"></div>
+			<div><table id="jsontable"></table></div>
+			<!-- <div class="slidingDiv jsonreport"></div> -->
+		</div>
+		
+		<h3>Google Maps Playground:</h3>
+		<p><span class="mapslider">Show/hide map</span></p>
+		<div class="slidingmap" id="map_canvas" style="width:100%; height:100%"></div>
+		
+		
         <div>
             <h4 style="color:orange">
                 Google Chart Sandbox
             </h4>
-			<div id="visualization"></div>
-			<div><table id="jsontable"></table></div><!--Div that will hold the pie chart-->
+			<input type="button" onclick="openEditor()" value="Open Editor">
+			<div id="visualization" style="width:400px; height:400px"></div>
+			<!--Div that will hold the pie chart-->
 			<div id="chart_div"></div>
 			<div id="querytable"></div>
 		</div>
-		<div id="jsondata"></div>
 		<div id="CORSoutput"></div>
+		
     </body>
 </html>

@@ -12,6 +12,11 @@ p span:hover { background-color:#ff0; cursor:pointer; }
 
 #dashboard { background-color:lightgrey; }
 
+html { height: 100% }
+body { height: 100%; margin: 0; padding: 0 }
+#map_canvas { height: 100% }
+
+
 /*
 
 .jsonreport TABLE { border-collapse:collapse; border: solid 1px #ccc; clear: left; background-color: #99CCFF; }

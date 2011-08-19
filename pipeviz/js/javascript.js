@@ -5,11 +5,10 @@ $(document).ready(function () {
 		createPipeList();
 		$('#DynamicGridLoading').hide();
 		
-		
 		$('.show_hide').click(function () {
 				$(".sliding").slideToggle();
 			});
-			
+		
 		$('.mapslider').click(function () {
 				$(".slidingmap").slideToggle();
 			});
@@ -174,4 +173,18 @@ function getRenderType() {
 	return rad_val;
 }
 
+function create_checkboxes() {
+	$('#keytable tr')
+	.filter(':has(:checkbox:checked)')
+	.addClass('selected')
+	.end()
+	.click(function (event) {
+			$(this).toggleClass('selected');
+			if (event.target.type !== 'checkbox') {
+				$(':checkbox', this).attr('checked', function () {
+						return !this.checked;
+					});
+			}
+		});
+}
  

@@ -143,7 +143,23 @@ pipe.prototype.getAttributeData = function (attrName) {
 	return arr;
 }
 
+//Return an object which contains all the pipe's parameters & their types
+pipe.prototype.get_data_keys = function () {
 
+	var item,
+		prop,
+		type,
+		paramListObj = {};
+		
+	item = this.flatItems[0];
+		
+	for (prop in item) {
+		type = Object.prototype.toString.call(item[prop]).slice(8, -1);
+		paramListObj[prop] = type;
+	}
+	
+	return paramListObj;
+}
 
 
 
@@ -247,7 +263,9 @@ function updateParameters() {
 
 
 
-// Object functions
+//##########################################################################################################
+// PIPE CALLS
+//##########################################################################################################
 /** convert the input url **/
 function pipeCallScriptTag(inputURL) {
 	
@@ -412,12 +430,18 @@ function createCORSRequest(method, url) {
 // Handles the Pipe response Callback
 function processJSONResponse(response) {
 	
+	var o;
+	
 	pipe1 = new pipe(response);
 	pipe1.flatten_data();
 	
+	o = pipe1.get_data_keys();
+	
 	
 	//CREATING ALL THE DATA TABLES
-	$('#DynamicGrid').append(CreateTableView( pipe1.flatItems , "lightPro", true)).fadeIn();
+	$('#DynamicGrid').append(CreateKeysView( o , "lightPro", true)).fadeIn();
+	create_checkboxes();
+
 	
 	//Displays Google Data Table
 	//drawTable(pipe1, 'jsontable');
@@ -437,6 +461,15 @@ function processJSONResponse(response) {
 	
 }
 
+
+
+
+
+
+
+//##########################################################################################################
+// VISUALISATION
+//##########################################################################################################
 function drawTable(pipeObj, outputDiv) {
 	
 	//Inits the Google Data Table (property of the pipe obj) for the 1st time

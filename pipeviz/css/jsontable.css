@@ -1,0 +1,28 @@
+﻿.lightPro { padding: 0; margin: 10px auto; border-collapse: collapse; border: 1px solid #333; font-family: "Trebuchet MS" , Verdana, Arial, Helvetica, sans-serif; font-size: 1em; color: #000; width: 100%; empty-cells: show; background-color: #fff; }
+
+.lightPro{
+	table-layout:fixed;
+	width:100%;
+	border:1px solid;
+	word-wrap:break-word;
+}
+.lightPro caption { caption-side: top; font-size: 0.9em; font-style: italic; text-align: right; padding: 0.5em 0; }
+.lightPro th, .lightPro td { border: 1px dotted; padding: 0.1em 0.3em; text-align: left; }
+.lightPro th[scope=col] { color: #fff; background-color: #585858; text-transform: uppercase; font-size: 1.1em; border-bottom: 1px dotted; border-right: 1px dotted; padding-left: 6px; }
+.lightPro th[scope=row] { background-color: #eee; border-right: 2px solid; font-size: 1.2em; }
+.lightPro tr:hover th[scope=row], .lightPro tr:hover td, .lightPro tr:hover { background-color: #66CCFF; color: #000; }
+.lightPro tr.alt td a, .lightPro tr td a { color: rgb(188,0,47); text-decoration: underline; }
+.lightPro tr.alt td a:hover, .lightPro tr td a:hover { color: rgb(47,0,188); text-decoration: underline; }
+.lightPro tr.pager:hover td, lightPro tr.pager:hover { background-color: #fff; }
+.lightPro tr.pager td table tr td { background-color: #795732; color: #fff; font-weight: bolder; padding: 0px; }
+.lightPro tr.pager td table tr:hover td { background-color: #795732; color: #fff; font-weight: bolder; }
+.lightPro tr.pager td table tr td a { color: #fff; background-color: #582E00; text-decoration: underline; padding: 2px 5px; display: block; border: 1px solid #000; }
+.lightPro tr.pager td table tr td a:hover { color: #fff; text-decoration: none; font-weight: bold; }
+.lightPro tr.pager td table tr td span { background-color: #fff; color: #000; padding: 0px 5px; }
+
+.lightPro tr.selected {background-color: #66CCFF; }
+.lightPro tr.selected th {background-color: #66CCFF; }
+.lightPro { width:50%; }
+
+#DynamicGridLoading { width: 160px; margin: 0 auto; padding: 0; background-color: #fff; text-align: center; border: solid 1px #000; }
+#DynamicGridLoading img { margin: 20 auto; vertical-align: middle; }

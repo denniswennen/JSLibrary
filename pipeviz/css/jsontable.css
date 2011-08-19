@@ -22,7 +22,7 @@
 
 .lightPro tr.selected {background-color: #66CCFF; }
 .lightPro tr.selected th {background-color: #66CCFF; }
-.lightPro { width:50%; }
+.lightPro { width:100%; }
 
 #DynamicGridLoading { width: 160px; margin: 0 auto; padding: 0; background-color: #fff; text-align: center; border: solid 1px #000; }
 #DynamicGridLoading img { margin: 20 auto; vertical-align: middle; }

@@ -2,6 +2,7 @@ $(document).ready(function () {
 		
 		//INIT onLoad
 		$("#btnDel").hide();
+		$(".sliding").hide();
 		createPipeList();
 		$('#DynamicGridLoading').hide();
 		
@@ -174,7 +175,7 @@ function getRenderType() {
 }
 
 function create_checkboxes() {
-	$('#keytable tr')
+	$("#keytable tr")
 	.filter(':has(:checkbox:checked)')
 	.addClass('selected')
 	.end()
@@ -185,6 +186,7 @@ function create_checkboxes() {
 						return !this.checked;
 					});
 			}
+			$(this).find("span").toggleClass('selected');
 		});
 }
  

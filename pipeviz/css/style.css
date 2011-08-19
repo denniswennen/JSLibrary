@@ -109,7 +109,7 @@ footer a:hover{}
 .CustomForm .wrapper {height:30px}
 .CustomForm .textarea_box {height:113px;padding-bottom:10px}
 .CustomForm a:hover {background:url(../images/button2_bg_active.gif) top repeat-x #f77107}
-.CustomForm a {margin-left:10px;float:right;width:85px;height:34px;font-size:15px;line-height:32px;color:#fff;text-align:center;text-transform:uppercase;text-decoration:none;background:url(../images/button2_bg.gif) top repeat-x #4f4f4f;border-radius:8px;-moz-border-radius:8px;-webkit-border-radius:8px;position:relative}
+.CustomForm a {margin-left:10px;float:right;width:85px;height:34px;font-size:12px;line-height:32px;color:#fff;text-align:center;text-transform:uppercase;text-decoration:none;background:url(../images/button2_bg.gif) top repeat-x #4f4f4f;border-radius:8px;-moz-border-radius:8px;-webkit-border-radius:8px;position:relative}
 #ContactForm .shadow {display:block;position:absolute;background:url(../images/button2_shadow.gif) no-repeat;height:9px;font-size:0;line-height:0;bottom:-9px;left:0}
 #ContactForm .input {width:252px;height:18px;border:1px solid #d7d8d8;background:url(../images/bg_input.gif) top repeat-x #edeeee;padding:2px 5px;color:#000;font:14px Arial, Helvetica, sans-serif}
 #ContactForm textarea {overflow:auto;margin:0;width:252px;height:107px;border:1px solid #d7d8d8;background:url(../images/bg_textarea.gif) top repeat-x #edeeee;padding:2px 5px;color:#000;font:14px Arial, Helvetica, sans-serif}

@@ -11,15 +11,11 @@
 #page_DataView .pad {padding-top:30px;padding-bottom:28px}
  /* #page_DataView p {width:163px;float:left;padding-bottom:0px} */
 /* index-3.html */
-#page_Viz h2 {color:#e40016;margin:2px 0 0px}
-#page_Viz .pad {padding-top:20px;padding-bottom:5px}
-
-#page_Products h2 {color:#0aa868;margin:2px 0 1px}
-#page_Products .pad {padding-top:30px;padding-bottom:5px}
-#page_Products .pad_bot1 {padding-bottom:10px}
+#page_Control h2 {color:#0aa868;margin:2px 0 0px}
+#page_Control .pad {padding-top:20px;padding-bottom:5px}
 /* index-4.html */
-#page_FAQ h2 {color:#e40016;margin:2px 0 0px}
-#page_FAQ .pad {padding-top:20px;padding-bottom:5px}
+#page_Visualisation h2 {color:#e40016;margin:2px 0 0px}
+#page_Visualisation .pad {padding-top:20px;padding-bottom:5px}
 /* index-5.html */
 #page_Contacts h2 {color:#f77007;margin:3px 0 1px}
 #page_Contacts .pad {padding:30px 12px 28px 30px}

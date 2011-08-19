@@ -10,23 +10,24 @@ google.load('visualization', '1', {
 		'packages' : ['corechart', 'table', 'charteditor']
 	});
 
-	
-var json3 = { "d": "[{\"Id\":1,\"UserName\":\"Sam Smith\"},{\"Id\":2,\"UserName\":\"Fred Frankly\"},{\"Id\":1,\"UserName\":\"Zachary Zupers\"}]" }
+var json3 = {
+	"d" : "[{\"Id\":1,\"UserName\":\"Sam Smith\"},{\"Id\":2,\"UserName\":\"Fred Frankly\"},{\"Id\":1,\"UserName\":\"Zachary Zupers\"}]"
+}
 
 var pipe1,
-	wrapper;
-	pipelist = {
-		"7a31ec30311b205544ee744b872f4417" : {
-			name: "Sparen en Beleggen - tijd.be",
-			url: "http://pipes.yahoo.com/pipes/pipe.info?_id=7a31ec30311b205544ee744b872f4417",
-			params : []
-		},
-		"f7ce5f42573f2aba3aa11fb99a38c66d" : {
-			name: "Referrals Test",
-			url: "http://pipes.yahoo.com/pipes/pipe.info?_id=f7ce5f42573f2aba3aa11fb99a38c66d",
-			params : []
-		}
-	};
+wrapper;
+pipelist = {
+	"7a31ec30311b205544ee744b872f4417" : {
+		name : "Sparen en Beleggen - tijd.be",
+		url : "http://pipes.yahoo.com/pipes/pipe.info?_id=7a31ec30311b205544ee744b872f4417",
+		params : []
+	},
+	"f7ce5f42573f2aba3aa11fb99a38c66d" : {
+		name : "Referrals Test",
+		url : "http://pipes.yahoo.com/pipes/pipe.info?_id=f7ce5f42573f2aba3aa11fb99a38c66d",
+		params : []
+	}
+};
 
 //GLobal only item for representing the returned JSON object
 
@@ -89,9 +90,9 @@ googleDataTable.prototype.fillColumns = function (dataArray) {
 }
 
 pipe.prototype.flatten_data = function () {
-
+	
 	var pipeItems,
-		pipeItemsLength;
+	pipeItemsLength;
 	
 	pipeItems = this.value.items;
 	pipeItemsLength = pipeItems.length;
@@ -99,8 +100,7 @@ pipe.prototype.flatten_data = function () {
 	for (i = 0; i < pipeItemsLength; i++) {
 		this.flatItems.push(flatten(pipeItems[i]));
 	}
-
-
+	
 }
 
 pipe.prototype.initDataTable = function () {
@@ -127,7 +127,7 @@ pipe.prototype.updateData = function () {
 }
 
 //User input the attribute name and get an array with all the values back, usefull to use the array of values as data somewhere else
-pipe.prototype.getAttributeData = function (attrName) {
+pipe.prototype.collect_data_array = function (key) {
 	
 	var arr = [],
 	items,
@@ -137,7 +137,7 @@ pipe.prototype.getAttributeData = function (attrName) {
 	itemsLength = this.flatItems.length;
 	
 	for (i = 0; i < itemsLength; i++) {
-		arr.push(items[i][attrName]);
+		arr.push(items[i][key]);
 	}
 	
 	return arr;
@@ -145,23 +145,26 @@ pipe.prototype.getAttributeData = function (attrName) {
 
 //Return an object which contains all the pipe's parameters & their types
 pipe.prototype.get_data_keys = function () {
-
+	
 	var item,
-		prop,
-		type,
-		paramListObj = {};
-		
+	prop,
+	type,
+	paramListObj = {},
+	i = 0;
+	
 	item = this.flatItems[0];
-		
+	
 	for (prop in item) {
 		type = Object.prototype.toString.call(item[prop]).slice(8, -1);
-		paramListObj[prop] = type;
+		paramListObj[prop] = {};
+		paramListObj[prop].id = i;
+		paramListObj[prop].type = type;
+		paramListObj[prop].value = item[prop];
+		i++;
 	}
 	
 	return paramListObj;
 }
-
-
 
 //##########################################################################################################
 // USER interface
@@ -206,13 +209,17 @@ var ControlDashboard = {
 function update() {
 	
 	//update DATA
-	var pipe = pipe1;
+	var pipe,
+	o;
+	
+	pipe = pipe1;
+	o = pipe1.get_data_keys();
 	
 	pipe.updateData();
 	
 	//update JSON view
 	try {
-		outputDoc = this.jsonFormatter.jsonToHTML(pipe.flatItems, this.uri);
+		outputDoc = this.jsonFormatter.jsonToHTML(pipe.value, this.uri);
 	} catch (e) {
 		outputDoc = this.jsonFormatter.errorPage(e, this.data, this.uri);
 	}
@@ -221,10 +228,15 @@ function update() {
 	addClickHandlers();
 	
 	//update GOOGLE DATA TABLE
-	updateTable(pipe, "jsontable");
+	//updateTable(pipe, "jsontable");
 	
 	//update CONTROL DASHBOARD
 	updateControlDashboard();
+	
+	//CREATING ALL THE DATA TABLES
+	$('#keytable').remove();
+	$('#DynamicGrid').append(CreateKeysView(o, "lightPro", true)).fadeIn();
+	create_checkboxes();
 }
 
 function updateControlDashboard() {
@@ -249,8 +261,6 @@ function updateParameters() {
 	var id = GetSelectedValue('pipelist');
 	createYQLscriptTag(id);
 }
-
-
 
 
 
@@ -288,12 +298,12 @@ function pipeCallScriptTag(inputURL) {
 }
 
 function createYQLscriptTag(pipeID) {
-
-var uri,
+	
+	var uri,
 	scriptEl,
 	scriptInsert;
 	
-	uri = 'http://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20html%20where%20url%3D%22http%3A%2F%2Fpipes.yahoo.com%2Fpipes%2Fpipe.info%3F_id%3D' + pipeID +'%22%20and%20xpath%20%3D%20\'%2F%2Fdiv%2Fform%2Ftable%2F*%2F*%2Finput%5Bnot%20(%40name%3D%22_cmd%22)%5D\'&format=json&diagnostics=true&callback=set_pipe_parameters';
+	uri = 'http://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20html%20where%20url%3D%22http%3A%2F%2Fpipes.yahoo.com%2Fpipes%2Fpipe.info%3F_id%3D' + pipeID + '%22%20and%20xpath%20%3D%20\'%2F%2Fdiv%2Fform%2Ftable%2F*%2F*%2Finput%5Bnot%20(%40name%3D%22_cmd%22)%5D\'&format=json&diagnostics=true&callback=set_pipe_parameters';
 	
 	scriptEl = document.createElement('script');
 	//scriptEl.type = 'text/javascript';
@@ -302,49 +312,44 @@ var uri,
 	scriptInsert.parentNode.insertBefore(scriptEl, scriptInsert);
 	
 	console.log(uri);
-
+	
 }
 
 function set_pipe_parameters(o) {
-
+	
 	var list,
-		id,
-		el,
-		out_div,
-		text;
-		
+	id,
+	el,
+	out_div,
+	text;
+	
 	out_div = document.getElementById("pipeparameters");
 	text = "";
 	
-	if( o.query.count > 0 ) { // the pipe has parameters
+	if (o.query.count > 0) { // the pipe has parameters
 		list = o.query.results.input;
 		id = GetSelectedValue('pipelist');
 		pipelist[id].params.length = 0; //clears the parameters for the current selected pipe
 		
 		//multiple returned parameters
-		if ( $.isArray(list) ) {
-			for(i=0; i<list.length; i++) {
+		if ($.isArray(list)) {
+			for (i = 0; i < list.length; i++) {
 				pipelist[id].params.push(list[i]);
-				text += list[i].name + '<input type="text" class="param_value" name="'+ list[i].value + '" id="value' + (i+1) +'"/><br>';
+				text += list[i].name + '<input type="text" class="param_value" name="' + list[i].value + '" id="value' + (i + 1) + '"/><br>';
 			}
 		}
 		//only found 1 parameter
 		else { //Object
 			pipelist[id].params.push(list);
-			text += list.name + '  <input type="text" class="param_value" name="'+ list.value + '" id="value1"/><br>';
+			text += list.name + '  <input type="text" class="param_value" name="' + list.value + '" id="value1"/><br>';
 		}
 		
-		
-	}
-	
-	else {
+	} else {
 		text = "(This pipe has no parameters)";
 	}
 	
-
 	//text = "tetten: " + '<input type="text" class="param_value" name="'+ "tettenvalue1" + '" id="' + "tettenvalue1" +'"/>';
 	out_div.innerHTML = text;
-	
 	
 }
 
@@ -363,12 +368,12 @@ function createRequestURI(id) {
 	paramList = pipelist[id].params;
 	rendertype = getRenderType();
 	param_values = document.getElementsByClassName("param_value")
-	
-	for (i=0; i< paramList.length; i++) {
+		
+		for (i = 0; i < paramList.length; i++) {
 			str += "&" + paramList[i].name + "=" + param_values[i].value;
-	}
-	
-	fullUri = uri.replace("info", "run");
+		}
+		
+		fullUri = uri.replace("info", "run");
 	fullUri += "&_render=",
 	fullUri += rendertype;
 	fullUri += str;
@@ -386,8 +391,7 @@ function pipeCallCORS() {
 	
 	id = GetSelectedValue('pipelist');
 	
-	
-	request = createCORSRequest("get", createRequestURI( id ));
+	request = createCORSRequest("get", createRequestURI(id));
 	renderType = getRenderType();
 	
 	document.getElementById('loading').style.display = 'inline';
@@ -437,11 +441,9 @@ function processJSONResponse(response) {
 	
 	o = pipe1.get_data_keys();
 	
-	
 	//CREATING ALL THE DATA TABLES
-	$('#DynamicGrid').append(CreateKeysView( o , "lightPro", true)).fadeIn();
+	$('#DynamicGrid').append(CreateKeysView(o, "lightPro", true)).fadeIn();
 	create_checkboxes();
-
 	
 	//Displays Google Data Table
 	//drawTable(pipe1, 'jsontable');
@@ -460,6 +462,11 @@ function processJSONResponse(response) {
 	document.getElementById('loading').style.display = 'none'; //remove loading indicator
 	
 }
+
+
+
+
+
 
 
 
@@ -507,8 +514,6 @@ function drawExampleChart() {
 	chart,
 	colNumbers = [];
 	
-
-	
 	dataTable = pipe1.gTable.data;
 	dataView = new google.visualization.DataView(dataTable);
 	dataView.setColumns(colNumbers);
@@ -523,8 +528,55 @@ function drawExampleChart() {
 	
 }
 
-function draw() {
+function draw_selected_attributes() {
+	
+	var dataTable,
+	dataView,
+	chart,
+	colNumbers = [],
+	keyNamesArray = [],
+	chart = 'ColumnChart',
+	selectedKeys,
+	allKeys,
+	i,
+	n,
+	chartEditor = null,
+	typeChart;
+	
+	
+	
+	allKeys = pipe1.get_data_keys();
+	selectedKeys = $("#keytable tr").find("span.selected");
+	
+	//find the keynames of all the selected attributes
+	for (i = 0; i < selectedKeys.length; i++) {
+		key = selectedKeys[i].innerHTML;
+		colNumbers.push( allKeys[key].id );
+	}
 
+	dataTable = pipe1.gTable.data;
+	dataView = new google.visualization.DataView(dataTable);
+	dataView.setColumns(colNumbers);
+	
+	typeChart = GetSelectedText('typeChart')
+	
+	wrapper = new google.visualization.ChartWrapper({
+				chartType : typeChart,
+				options : {
+					width : 900,
+					heigth : 300
+				},
+				containerId : 'visualization',
+			});
+	
+	wrapper.setDataTable(dataView);
+	//wrapper.setView(dataView);
+	wrapper.draw();
+	
+}
+
+function draw() {
+	
 	var dataTable,
 	dataView,
 	chart,
@@ -540,36 +592,36 @@ function draw() {
 	dataTable = pipe1.gTable.data;
 	dataView = new google.visualization.DataView(dataTable);
 	dataView.setColumns(colNumbers);
-
+	
 	wrapper = new google.visualization.ChartWrapper({
 				chartType : chart,
-				options: {
-					width: 900,
-					heigth: 300
+				options : {
+					width : 900,
+					heigth : 300
 				},
 				containerId : 'visualization',
 			});
-			
+	
 	wrapper.setDataTable(dataView);
 	//wrapper.setView(dataView);
 	wrapper.draw();
-
+	
 }
 
 function openEditor() {
-  // Handler for the "Open Editor" button.
-  var editor = new google.visualization.ChartEditor();
-  google.visualization.events.addListener(editor, 'ok',
-    function() { 
-      wrapper = editor.getChartWrapper();  
-      wrapper.draw(document.getElementById('visualization')); 
-  }); 
-  editor.openDialog(wrapper);
+	// Handler for the "Open Editor" button.
+	var editor = new google.visualization.ChartEditor();
+	google.visualization.events.addListener(editor, 'ok',
+		function () {
+			wrapper = editor.getChartWrapper();
+			wrapper.draw(document.getElementById('visualization'));
+		});
+	editor.openDialog(wrapper);
 }
 
-function redrawChart(){
-        chartEditor.getChartWrapper().draw(document.getElementById('visualization'));
-      }
+function redrawChart() {
+	chartEditor.getChartWrapper().draw(document.getElementById('visualization'));
+}
 
 // Utility functions
 function propagateAttributes() {
@@ -678,6 +730,37 @@ function convertData() {
 	update();
 	
 }
+
+function convert_selected_attributes() {
+	
+	var items,
+	keysArray,
+	key,
+	type,
+	i,
+	outputDoc;
+	
+	items = pipe1.flatItems;
+	//key = GetSelectedText('attr1dropdown'),
+	//get the attributes that need to be converted
+	
+	keys = $("#keytable tr").find("span.selected");
+	
+	type = GetSelectedText('conversionType');
+	
+	for (i = 0; i < items.length; i++) {
+		for (j = 0; j < keys.length; j++) {
+			key = keys[j].innerHTML;
+			items[i][key] = typeConvert(type, items[i][key]);
+		}
+	}
+	
+	pipe1.flatItems = items;
+	
+	update();
+	
+}
+
 //Examines the JSON string and converts it into the right JavaScript data type
 function pipeReviver(key, value) {
 	

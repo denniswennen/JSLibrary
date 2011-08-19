@@ -3,6 +3,7 @@
 <head>
 <title>PipeZ</title>
 <meta charset="utf-8">
+<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
 <link rel="stylesheet" href="css/reset.css" type="text/css" media="all">
 <link rel="stylesheet" href="css/layout.css" type="text/css" media="all">
 <link rel="stylesheet" href="css/style.css" type="text/css" media="all">
@@ -12,7 +13,6 @@
 <link rel="stylesheet" type="text/css" href="css/jsontable.css"  />
 
 <script type="text/javascript" src="https://www.google.com/jsapi"></script>
-<!-- <script type="text/javascript" src="js/jquery.js"></script>-->
 
 <script type="text/javascript" src="js/jquery-1.4.2.js" ></script>
 <script type="text/javascript" src="js/cufon-yui.js"></script>
@@ -80,8 +80,8 @@
 			<li class="menu_active nav1"><a href="#page_Home">Home</a></li>
 			<li class="nav2"><a href="#page_Config">Pipe Config</a></li>
 			<li class="nav3"><a href="#page_DataView">DataView</a></li>
-			<li class="nav4"><a href="#page_Viz">Visualisation</a></li>
-			<li class="nav5"><a href="#page_FAQ">FAQ</a></li>
+			<li class="nav4"><a href="#page_Control">Control</a></li>
+			<li class="nav5"><a href="#page_Visualisation">Visualisation</a></li>
 			<li class="nav6"><a href="#page_Contacts">Contacts</a></li>
 		</ul>
 	</nav>
@@ -96,7 +96,6 @@
 					<img src="img/marshall.jpg" alt="">
 				</div>
 				<div id="slider_shadow"></div>
-				
 			</div>
 			<div id="page_Config">
 				<h2>Yahoo Pipe loading &amp; config</h2>
@@ -133,29 +132,7 @@
 												
 											</div>
 										</form>
-										<div id="dashboard">
-											<h3>Control Dashboard</h3>
-											<form name="myform" action="" method="" class="CustomForm">
-													<div align="center">
-														<label for="attr1dropdown">Attribute 1:</label>
-														<select id="attr1dropdown" name="attr1dropdown"></select>
-														<label for="attr2dropdown">Attribute 2:</label>
-														<select id="attr2dropdown" name="attr2dropdown"></select>
-														<input type="button" value="Draw Chart" onclick="draw()">
-													</div>
-													<div align="center">
-														<label for="conversionType">Type: </label>
-														<select id="conversionType" name="conversionType">
-															<option>Number</option>
-															<option>String</option>
-															<option>Boolean</option>
-														</select>
-														<input type="button" value="Convert Attribute 1" onclick="convertData()">
-													</div>
-											</form>
-											<h4>List of attributes:</h4>
-											<div id="datatypes"></div>
-										</div>
+										
 									</div>
 								</div>
 							</div>
@@ -171,20 +148,43 @@
 							<div class="box1">
 								<div class="pad">
 									<div class="wrapper pad_bot2">
-										<p class="pad_bot1"><strong>Info</strong></p>
-										<p>Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore.</p>
-										<form class="CustomForm">
-											<a href="#page_DataView" class="button show_hide" style="width:150px;"><span class="shadow"></span>Toggle View</a>
-										</form>
-										<div id="sliding">
+										<div>
 											<h3>Data Keys &amp; Types</h3>
-											<div id="DynamicGrid" >
+											
+											<div id="DynamicGrid">
 												<div id="DynamicGridLoading" >
 													<img src="img/loader2.gif" /><span> Loading Data... </span>
 												</div>
 											</div>
-											<h3>Json View</h3>
-											<div id="jsondata"></div>
+											
+											<h3>Convert Attributes</h3>
+											<p>In this section you can convert the types of the selected attributes. Select the attributes in the dataview table, choose the type here and click on the button 'Convert Selection'.</p>
+											<form name="myform" action="" method="" class="CustomForm">
+												<a href="#jsonviewform" class="show_hide" style="width:150px;"><span class="shadow"></span>JSON View</a>
+												<a href="#page_DataView" class="button" onclick='convert_selected_attributes()'><span class="shadow"></span>Convert</a>
+												<label for="conversionType"><strong>Type: </strong></label>
+												<select id="conversionType" name="conversionType">
+													<option>Number</option>
+													<option>String</option>
+													<option>Boolean</option>
+												</select>
+											</form>
+											
+											
+											<form class="CustomForm" id="jsonviewform">
+											
+											</form>
+											<h3>Selected attributes</h3>
+											<div id="datatypes"></div>
+											<form name="myform" action="" method="" class="CustomForm">
+												<a href="#page_Visualisation" class="button" onclick='draw_selected_attributes()' style='width:150px;'><span class="shadow"></span>google draw</a>
+											</form>
+											
+											
+											<div class="sliding" id="jsonview">
+												<h3>Json View</h3>
+												<div id="jsondata"></div>
+											</div>
 										</div>
 									</div>
 								</div>
@@ -193,42 +193,41 @@
 					</div>
 				</div>
 			</div>
-			<div id="page_Viz">
-				<h2>Visualisation</h2>
+			<div id="page_Control">
+				<h2>Control Dashboard</h2>
 				<div class="box1_bot">
 					<div class="box1_left">
 						<div class="box1_right">
 							<div class="box1">
 								<div class="pad">
-									<p class="pad_bot1"><strong>Lorem ipsum dolor sit amet, consectetur adipisicing elit</strong></p>
-									<p>Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore.</p>
-									<p class="pad_bot1"><strong>Excepteur sint occaecat cupidatat non proident, sunt officia deserunt</strong></p>
-									<p>Perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.</p>
-									<p class="pad_bot1"><strong>Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut</strong></p>
-									<p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt.</p>
-									<p class="pad_bot1"><strong>Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis</strong></p>
-									<p>Suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur. Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur.</p>
+									<div class="wrapper pad_bot2">
+										<div id="dashboard">
+										<h3>Chart Type: </strong>
+										<select id="typeChart" name="TypeChart">
+											<option>BarChart</option>
+											<option>ColumnChart</option>
+											<option>PieChart</option>
+											<option>ScatterChart</option>
+											<option>LineChart</option>
+										</select>
+										</div>
+									</div>
 								</div>
 							</div>
 						</div>
 					</div>
 				</div>
 			</div>
-			<div id="page_FAQ">
-				<h2>Frequently Asked Questions</h2>
+			<div id="page_Visualisation">
+				<h2>Visualisation</h2>
 				<div class="box1_bot">
 					<div class="box1_left">
 						<div class="box1_right">
 							<div class="box1">
 								<div class="pad">
-									<p class="pad_bot1"><strong>Lorem ipsum dolor sit amet, consectetur adipisicing elit</strong></p>
-									<p>Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore.</p>
-									<p class="pad_bot1"><strong>Excepteur sint occaecat cupidatat non proident, sunt officia deserunt</strong></p>
-									<p>Perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.</p>
-									<p class="pad_bot1"><strong>Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut</strong></p>
-									<p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt.</p>
-									<p class="pad_bot1"><strong>Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis</strong></p>
-									<p>Suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur. Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur.</p>
+									<div class="wrapper pad_bot2">
+										<div id="visualization" style="width:900px; height:500px"></div>
+									</div>
 								</div>
 							</div>
 						</div>

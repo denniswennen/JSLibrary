@@ -30,7 +30,12 @@
 <script type="text/javascript" src="js/valve.js"></script>
 <script type="text/javascript" src="js/jsonviewmod.js"></script>
 <script type="text/javascript" src="js/javascript.js"></script>
+   
+   <!-- Load the Timeline library after reseting the fonts, etc -->
+<script src="http://static.simile.mit.edu/timeline/api-2.3.0/timeline-api.js?bundle=true" type="text/javascript"></script>
+<script type="text/javascript" src="js/timeline.js"></script>
 
+<script type="text/javascript" src="js/csspopup.js"></script>
 
 
 
@@ -57,7 +62,7 @@
 						<ul id="top_nav">
 							<li class="bg_none"><a href="#page_Home" class="icon1"></a></li>
 							<li><a href="#page_Contacts" class="icon2"></a></li>
-							<li><a href="#" class="icon3"></a></li>
+							<li><a href="#" class="icon3" onclick='return clicker();'></a></li>
 						</ul>
 					</nav>
 				</div>
@@ -121,10 +126,11 @@
 												<input type="button" id="btnDel" value="remove parameter" />
 												-->
 												<p>
-													<a href="#page_DataView" class="button" onclick='pipeCallCORS()' style='width:150px;'><span class="shadow"></span>Import Pipe</a>
+													<a href="#page_Config" class="button" onclick='pipeCallCORS()' style='width:150px;'><span class="shadow"></span>Import Pipe</a>
 													<a href="#page_Config" class="button" onclick=""><span class="shadow"></span>test</a>
 													<a href="#" class="button" onclick="loadGoogleMapsAPI()"><span class="shadow"></span>Maps Init</a>
 												</p>
+												<h2 id="pipestatus">No pipe loaded.</h2>
 												<div id="loading" style="display:none">
 													<img id="loadingImage" src="img/ajax-loader.gif" alt="loadingImage">
 												</div>
@@ -150,7 +156,6 @@
 									<div class="wrapper pad_bot2">
 										<div>
 											<h3>Data Keys &amp; Types</h3>
-											
 											<div id="DynamicGrid">
 												<div id="DynamicGridLoading" >
 													<img src="img/loader2.gif" /><span> Loading Data... </span>
@@ -170,16 +175,11 @@
 												</select>
 											</form>
 											
-											
 											<form class="CustomForm" id="jsonviewform">
 											
 											</form>
 											<h3>Selected attributes</h3>
 											<div id="datatypes"></div>
-											<form name="myform" action="" method="" class="CustomForm">
-												<a href="#page_Visualisation" class="button" onclick='draw_selected_attributes()' style='width:150px;'><span class="shadow"></span>google draw</a>
-											</form>
-											
 											
 											<div class="sliding" id="jsonview">
 												<h3>Json View</h3>
@@ -201,15 +201,46 @@
 							<div class="box1">
 								<div class="pad">
 									<div class="wrapper pad_bot2">
-										<div id="dashboard">
-										<h3>Chart Type: </strong>
-										<select id="typeChart" name="TypeChart">
-											<option>BarChart</option>
-											<option>ColumnChart</option>
-											<option>PieChart</option>
-											<option>ScatterChart</option>
-											<option>LineChart</option>
-										</select>
+										<div id="googledashboard" style="padding-bottom:20px;">
+											<h3>Google Chart: </h3>
+											<form name="myform" action="" method="" class="CustomForm">
+												<a href="#page_Visualisation" class="button" onclick='draw_selected_attributes()' style='width:150px;'><span class="shadow"></span>draw</a>
+											</form>
+											<div id="dashboard"> Chart Type:
+											<select id="typeChart" name="TypeChart">
+												<option>BarChart</option>
+												<option>ColumnChart</option>
+												<option>PieChart</option>
+												<option>ScatterChart</option>
+												<option>LineChart</option>
+											</select>
+											</div>
+										</div>
+										<div id="timelinedashboard">
+											<h3>Timeline options: </h3>
+											<form name="myform" action="" method="" class="CustomForm">
+												<a href="#page_Visualisation" style="width:150px;" onclick="init_timeline()"><span class="shadow"></span>create timeline</a>
+											</form>
+											<div>
+												Main View:
+												<select id="MainViewUnit" name="TimeLineViewUnit" onchange="init_timeline()">
+													<option>MINUTE</option>
+													<option>HOUR</option>
+													<option selected="selected" >DAY</option>
+													<option>WEEK</option>
+													<option>MONTH</option>
+													<option>YEAR</option>
+												</select>
+												Overview: </strong>
+												<select id="OverViewUnit" name="TimeLineViewUnit" onchange="init_timeline()">
+													<option>MINUTE</option>
+													<option>HOUR</option>
+													<option>DAY</option>
+													<option>WEEK</option>
+													<option>MONTH</option>
+													<option selected="selected" >YEAR</option>
+												</select>
+											</div>
 										</div>
 									</div>
 								</div>
@@ -226,7 +257,15 @@
 							<div class="box1">
 								<div class="pad">
 									<div class="wrapper pad_bot2">
+									<div>
+										<h3>Timeline</h3>
+										
+										<h4>Timeline View</h4>
+										<div id="timeline" style="height:400px; border: 1px solid #aaa"></div>
+										<div id="timelineControls"></div>
+										<h3>Google Visualisation</h3>
 										<div id="visualization" style="width:900px; height:500px"></div>
+									</div>
 									</div>
 								</div>
 							</div>

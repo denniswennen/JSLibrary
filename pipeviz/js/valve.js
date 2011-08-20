@@ -15,8 +15,9 @@ var json3 = {
 }
 
 var pipe1,
-wrapper;
-pipelist = {
+	wrapper,
+	pipeLoaded = false;
+	pipelist = {
 	"7a31ec30311b205544ee744b872f4417" : {
 		name : "Sparen en Beleggen - tijd.be",
 		url : "http://pipes.yahoo.com/pipes/pipe.info?_id=7a31ec30311b205544ee744b872f4417",
@@ -25,6 +26,11 @@ pipelist = {
 	"f7ce5f42573f2aba3aa11fb99a38c66d" : {
 		name : "Referrals Test",
 		url : "http://pipes.yahoo.com/pipes/pipe.info?_id=f7ce5f42573f2aba3aa11fb99a38c66d",
+		params : []
+	},
+	"45ac0c6883a348080eaa4522ff10e9e7" : {
+		name : "Combined Feeds",
+		url : "http://pipes.yahoo.com/pipes/pipe.info?_id=45ac0c6883a348080eaa4522ff10e9e7",
 		params : []
 	}
 };
@@ -405,7 +411,8 @@ function pipeCallCORS() {
 				if (r.count != 0) {
 					processJSONResponse(r);
 					//console.log("Pipe URL: " + createRequestURI(inputURL));
-					debug(r.count);
+					//document.getElementById("pipestatus").innerHTML = "";
+					document.getElementById("pipestatus").innerHTML = r.count + " items loaded.";
 				}
 			} else if (rendertype == "kml") {
 				//do something
@@ -718,7 +725,7 @@ function convertData() {
 	outputDoc;
 	
 	items = pipe1.flatItems;
-	key = GetSelectedText('attr1dropdown'),
+	key = GetSelectedText('attr1dropdown');
 	type = GetSelectedText('conversionType');
 	
 	for (i = 0; i < items.length; i++) {

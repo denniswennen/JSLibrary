@@ -6,6 +6,7 @@ $(document).ready(function () {
 		createPipeList();
 		$('#DynamicGridLoading').hide();
 		
+		
 		$('.show_hide').click(function () {
 				$(".sliding").slideToggle();
 			});
@@ -189,4 +190,3 @@ function create_checkboxes() {
 			$(this).find("span").toggleClass('selected');
 		});
 }
- 

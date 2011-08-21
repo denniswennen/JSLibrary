@@ -1,3 +1,5 @@
+var stack = [0];
+
 $(document).ready(function () {
 		
 		//INIT onLoad
@@ -5,6 +7,35 @@ $(document).ready(function () {
 		$(".sliding").hide();
 		createPipeList();
 		$('#DynamicGridLoading').hide();
+		
+		$('.button:not("#importpipebutton")').css('visibility', 'hidden');
+		
+		$('#div_timeline, #div_googlechart')
+			.css('visibility', 'hidden');
+		
+		$('#div_timeline, #div_googlechart').each(function() {
+			if ($(this).css("visibility") == "hidden") {
+			$(this).css('display', 'none');
+			}
+		});
+		
+		$('.button').click(
+			function () {
+				var id,
+					div;
+					
+				id = $(this).attr('id');
+				
+				if ( "googledrawbutton" == id ) {
+					div = $('#div_googlechart');
+					div.css('display', 'inherit').css('visibility', 'visible');
+				} else if ( "timelinedrawbutton" == id ) {
+					div = $('#div_timeline');
+					div.css('display', 'inherit').css('visibility', 'visible');
+				}
+					
+			}
+		);
 		
 		
 		$('.show_hide').click(function () {
@@ -69,7 +100,7 @@ function addOption(selectbox, text, value) {
 	optn.value = value;
 	selectbox.options.add(optn);
 }
-
+	
 // Adds the clickHandlers for the JSON Viewer
 function addClickHandlers() {
 	
@@ -177,16 +208,89 @@ function getRenderType() {
 
 function create_checkboxes() {
 	$("#keytable tr")
-	.filter(':has(:checkbox:checked)')
-	.addClass('selected')
-	.end()
-	.click(function (event) {
+		.filter(':has(:checkbox:checked)')
+		.addClass('selected')
+		.end()
+		.click(function (event) {
+		
+			var num = $("#keytable").find(".selected").length;
+			var result = $("#keytable").find(".numberCell");
+			var i,
+				j,
+				v,
+				bingo;
+			
+			
+			for(i=0; i < result.length; i++) {
+				if( result[i].innerHTML.length !== 0) {
+					v = parseInt( result[i].innerHTML, 10);
+					stack[v] = v;
+				}
+			}
+			console.log ( stack );
+				
+			
 			$(this).toggleClass('selected');
+			
+			if( $(this).hasClass('selected') ) { //number add
+				for(j=0; j < stack.length; j++) {
+					if( stack[j] === undefined ) {
+						console.log ("tetteuuh!");
+						bingo = j;
+						break;
+					}
+					else {
+						bingo = num;
+					}
+				}
+				$(this).find("td.numberCell")
+					.attr('id', 'selected'+bingo)
+					.html( bingo );
+			} 
+			else { //number remove
+				$(this).find("td.numberCell")
+					.removeAttr('id')
+					.html( "" );
+				for(i=0; i < result.length; i++) {
+					stack.length = 1;
+					if( result[i].innerHTML.length !== 0) {
+						v = parseInt( result[i].innerHTML, 10);
+						stack[v] = v;
+					}
+				}
+				
+			}
+			
+			
+			
+			
+			
+			
 			if (event.target.type !== 'checkbox') {
 				$(':checkbox', this).attr('checked', function () {
 						return !this.checked;
 					});
 			}
-			$(this).find("span").toggleClass('selected');
+			
+
 		});
+		
+}
+
+function update_status_text(str, status) {
+
+	var o;
+
+	o = document.getElementById("status");
+	o.innerHTML = str;
+	
+	
+	if( "error" == status ) {
+		o.style["color"] = "#e40016";
+	} else if ( "warning" == status ) {
+		o.style["color"] = "#f77007";
+	} else {
+		o.style["color"] = "#0aa868";
+	}
+
 }

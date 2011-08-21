@@ -37,7 +37,7 @@ header {width:100%;overflow:hidden;height:50px}
 #top_nav .icon2:hover {background:url(../images/icon2_active.png) no-repeat}
 #top_nav .icon3 {background:url(../images/icon3.png) no-repeat}
 #top_nav .icon3:hover {background:url(../images/icon3_active.png) no-repeat}
-#top_nav .bg_none {background:none}
+#top_nav .bg_none {background:none;}
 #logo {display:block;background:url(../images/logo.png) no-repeat;width:437px;height:59px;text-indent:-9999px}
 #icons {float:right;padding:54px 9px 0 0}
 #icons li {float:left;padding-left:14px}

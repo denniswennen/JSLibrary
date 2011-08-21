@@ -14,9 +14,9 @@ var json3 = {
 	"d" : "[{\"Id\":1,\"UserName\":\"Sam Smith\"},{\"Id\":2,\"UserName\":\"Fred Frankly\"},{\"Id\":1,\"UserName\":\"Zachary Zupers\"}]"
 }
 
-var pipe1,
+var mainpipe,
 	wrapper,
-	pipeLoaded = false;
+	pipeLoaded = false,
 	pipelist = {
 	"7a31ec30311b205544ee744b872f4417" : {
 		name : "Sparen en Beleggen - tijd.be",
@@ -31,6 +31,11 @@ var pipe1,
 	"45ac0c6883a348080eaa4522ff10e9e7" : {
 		name : "Combined Feeds",
 		url : "http://pipes.yahoo.com/pipes/pipe.info?_id=45ac0c6883a348080eaa4522ff10e9e7",
+		params : []
+	},
+	"0h4I8bvB3BGapGYoxJtC8g" : {
+		name: "Google News on Map",
+		url : "http://pipes.yahoo.com/pipes/pipe.info?_id=0h4I8bvB3BGapGYoxJtC8g",
 		params : []
 	}
 };
@@ -196,7 +201,7 @@ var ControlDashboard = {
 		type,
 		output;
 		
-		var item = pipe1.flatItems[0];
+		var item = mainpipe.flatItems[0];
 		
 		output = "<ul>";
 		for (prop in item) {
@@ -218,8 +223,8 @@ function update() {
 	var pipe,
 	o;
 	
-	pipe = pipe1;
-	o = pipe1.get_data_keys();
+	pipe = mainpipe;
+	o = mainpipe.get_data_keys();
 	
 	pipe.updateData();
 	
@@ -247,7 +252,7 @@ function update() {
 
 function updateControlDashboard() {
 	
-	var gTableObj = pipe1.gTable;
+	var gTableObj = mainpipe.gTable;
 	//Updates control dashboard
 	//ControlDashboard.propagateAttributeBoxes( gTable );
 	document.getElementById("datatypes").innerHTML = ControlDashboard.makeAttributesList(gTableObj);
@@ -262,9 +267,15 @@ function createPipeList() {
 	}
 }
 
-function updateParameters() {
+function update_UI() {
 	
-	var id = GetSelectedValue('pipelist');
+	var id;
+
+	id = GetSelectedValue('pipelist');
+	$('.button:not("#importpipebutton")').css('visibility', 'hidden');
+	$('#div_timeline, #div_googlechart')
+			.css('visibility', 'hidden')
+			.css('display', 'none');
 	createYQLscriptTag(id);
 }
 
@@ -410,9 +421,10 @@ function pipeCallCORS() {
 				//do something with the returned JSON object 'r'
 				if (r.count != 0) {
 					processJSONResponse(r);
-					//console.log("Pipe URL: " + createRequestURI(inputURL));
-					//document.getElementById("pipestatus").innerHTML = "";
-					document.getElementById("pipestatus").innerHTML = r.count + " items loaded.";
+					pipeLoaded = true;
+					//document.getElementById("statustext").innerHTML = r.count + " items loaded.";
+					update_status_text( r.count + " items loaded");	
+					$(".button").css('visibility', 'visible');
 				}
 			} else if (rendertype == "kml") {
 				//do something
@@ -443,22 +455,22 @@ function processJSONResponse(response) {
 	
 	var o;
 	
-	pipe1 = new pipe(response);
-	pipe1.flatten_data();
+	mainpipe = new pipe(response);
+	mainpipe.flatten_data();
 	
-	o = pipe1.get_data_keys();
+	o = mainpipe.get_data_keys();
 	
 	//CREATING ALL THE DATA TABLES
 	$('#DynamicGrid').append(CreateKeysView(o, "lightPro", true)).fadeIn();
 	create_checkboxes();
 	
 	//Displays Google Data Table
-	//drawTable(pipe1, 'jsontable');
+	//drawTable(mainpipe, 'jsontable');
 	
 	this.jsonFormatter = new JSONFormatter();
 	
 	try {
-		outputDoc = this.jsonFormatter.jsonToHTML(pipe1.value, this.uri);
+		outputDoc = this.jsonFormatter.jsonToHTML(mainpipe.value, this.uri);
 	} catch (e) {
 		outputDoc = this.jsonFormatter.errorPage(e, this.data, this.uri);
 	}
@@ -521,7 +533,7 @@ function drawExampleChart() {
 	chart,
 	colNumbers = [];
 	
-	dataTable = pipe1.gTable.data;
+	dataTable = mainpipe.gTable.data;
 	dataView = new google.visualization.DataView(dataTable);
 	dataView.setColumns(colNumbers);
 	
@@ -552,7 +564,7 @@ function draw_selected_attributes() {
 	
 	
 	
-	allKeys = pipe1.get_data_keys();
+	allKeys = mainpipe.get_data_keys();
 	selectedKeys = $("#keytable tr").find("span.selected");
 	
 	//find the keynames of all the selected attributes
@@ -561,7 +573,7 @@ function draw_selected_attributes() {
 		colNumbers.push( allKeys[key].id );
 	}
 
-	dataTable = pipe1.gTable.data;
+	dataTable = mainpipe.gTable.data;
 	dataView = new google.visualization.DataView(dataTable);
 	dataView.setColumns(colNumbers);
 	
@@ -596,7 +608,7 @@ function draw() {
 	colNumbers.push(document.getElementById('attr1dropdown').selectedIndex);
 	colNumbers.push(document.getElementById('attr2dropdown').selectedIndex);
 	
-	dataTable = pipe1.gTable.data;
+	dataTable = mainpipe.gTable.data;
 	dataView = new google.visualization.DataView(dataTable);
 	dataView.setColumns(colNumbers);
 	
@@ -724,7 +736,7 @@ function convertData() {
 	i,
 	outputDoc;
 	
-	items = pipe1.flatItems;
+	items = mainpipe.flatItems;
 	key = GetSelectedText('attr1dropdown');
 	type = GetSelectedText('conversionType');
 	
@@ -732,7 +744,7 @@ function convertData() {
 		items[i][key] = typeConvert(type, items[i][key]);
 	}
 	
-	pipe1.flatItems = items;
+	mainpipe.flatItems = items;
 	
 	update();
 	
@@ -747,7 +759,7 @@ function convert_selected_attributes() {
 	i,
 	outputDoc;
 	
-	items = pipe1.flatItems;
+	items = mainpipe.flatItems;
 	//key = GetSelectedText('attr1dropdown'),
 	//get the attributes that need to be converted
 	
@@ -762,7 +774,7 @@ function convert_selected_attributes() {
 		}
 	}
 	
-	pipe1.flatItems = items;
+	mainpipe.flatItems = items;
 	
 	update();
 	

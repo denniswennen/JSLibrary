@@ -13,6 +13,7 @@
 <link rel="stylesheet" type="text/css" href="css/jsontable.css"  />
 
 <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+<script type="text/javascript" src="js/gchart.js"></script>
 
 <script type="text/javascript" src="js/jquery-1.4.2.js" ></script>
 <script type="text/javascript" src="js/cufon-yui.js"></script>
@@ -34,6 +35,9 @@
    <!-- Load the Timeline library after reseting the fonts, etc -->
 <script src="js/timeline_2.3.0/timeline_js/timeline-api.js?bundle=true" type="text/javascript"></script>
 <script type="text/javascript" src="js/timeline.js"></script>
+
+<script type="text/javascript" src="js/ui.js"></script>
+<script type="text/javascript" src="http://dev.jquery.com/view/trunk/plugins/validate/jquery.validate.js"></script>
 
 
 
@@ -115,7 +119,7 @@
 										<p class="pad_bot1 pad_top1"><strong>Debug:</strong></p>
 										<div id="debug"></div>
 										<p class="pad_bot1 pad_top1"><strong>Choose a pipe to load:</strong></p>
-										<form id="paramForm" action="" class="CustomForm">
+										<form id="paramForm" method="get" action="" class="CustomForm">
 												<!-- <input type="text" name="inputurl" id="inputurl" size="100" value="http://pipes.yahoo.com/pipes/pipe.info?_id=7a31ec30311b205544ee744b872f4417" class="text-input"> -->
 												<select id="pipelist" name="pipelist" style="font-size:120%;font-weight:bold;font-family:monospace" onchange="update_UI()"></select>
 												<input type="radio" name="pipetype" value="json" checked="checked"> JSON
@@ -127,8 +131,7 @@
 												<input type="button" id="btnDel" value="remove parameter" />
 												-->
 												<p>
-													<a id="importpipebutton" href="#page_DataView" class="button" onclick='pipeCallCORS()' style='width:150px;'><span class="shadow"></span>Import Pipe</a>
-													<a href="#page_Config" class="button" onclick=""><span class="shadow"></span>test</a>
+													<a id="importpipebutton" href="#page_Config" class="button" onclick='pipeCallCORS()' style='width:150px;'><span class="shadow"></span>Import Pipe</a>
 													<a href="#" class="button" onclick="loadGoogleMapsAPI()"><span class="shadow"></span>Maps Init</a>
 												</p>
 												<!-- <h2 id="pipestatus">No pipe loaded.</h2> -->
@@ -156,6 +159,9 @@
 								<div class="pad">
 									<div class="wrapper pad_bot2">
 										<div>
+											<form action="" class="CustomForm">
+												<a href="#page_Control" class="button" onclick="get_selected_attributes()" style="width:150px;"><span class="shadow"></span>confirm selection</a>
+											</form>
 											<h3>Data Keys &amp; Types</h3>
 											<div id="DynamicGrid">
 												<div id="DynamicGridLoading" >
@@ -179,9 +185,7 @@
 											<form class="CustomForm" id="jsonviewform">
 											
 											</form>
-											<h3>Selected attributes</h3>
-											<div id="datatypes"></div>
-											
+																				
 											<div class="sliding" id="jsonview">
 												<h3>Json View</h3>
 												<div id="jsondata"></div>
@@ -202,20 +206,26 @@
 							<div class="box1">
 								<div class="pad">
 									<div class="wrapper pad_bot2">
+										<div id="attributedashboard">
+											<h3>Selected attributes</h3>
+											<div id="selectedattr_div"></div>
+										</div>
 										<div id="googledashboard" style="padding-bottom:20px;">
 											<h3>Google Chart: </h3>
 											<form name="myform" action="" method="" class="CustomForm">
 												<a id="googledrawbutton" href="#page_Visualisation" class="button" onclick='draw_selected_attributes()' style='width:150px;'><span class="shadow"></span>draw</a>
 											</form>
-											<div id="dashboard"> Chart Type:
-											<select id="typeChart" name="TypeChart">
+											<div id="dashboard">Type:
+											<select id="typeChart" name="TypeChart" onchange="change_chart_description()">
 												<option>BarChart</option>
 												<option>ColumnChart</option>
-												<option>PieChart</option>
+												<option selected="selected">PieChart</option>
 												<option>ScatterChart</option>
 												<option>LineChart</option>
 											</select>
+											
 											</div>
+											<div id="div_googledataformat"></div>
 										</div>
 										<div id="timelinedashboard">
 											<h3>Timeline options: </h3>
@@ -265,6 +275,7 @@
 									</div>
 									<div id="div_googlechart">
 										<h3>Google Visualisation</h3>
+										<div id="googletoolbar_div"></div>
 										<div id="visualization" style="width:900px; height:500px"></div>
 									</div>
 									</div>

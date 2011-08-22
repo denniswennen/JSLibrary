@@ -17,6 +17,7 @@ var json3 = {
 var mainpipe,
 	wrapper,
 	pipeLoaded = false,
+	pipeConfirmed = false,
 	pipelist = {
 	"7a31ec30311b205544ee744b872f4417" : {
 		name : "Sparen en Beleggen - tijd.be",
@@ -59,6 +60,7 @@ function pipe(json) {
 function googleDataTable() {
 	this.data = new google.visualization.DataTable();
 	this.attributes = [];
+	this.currentDataView = [];
 }
 
 //takes an object, makes it flat so it is 1 object with properties. All this properties are converted into Google Data Table columns
@@ -121,17 +123,18 @@ pipe.prototype.initDataTable = function () {
 	
 }
 
-pipe.prototype.updateData = function () {
+pipe.prototype.updateGoogleData = function () {
 	
-	var items,
-	itemsLength;
+	var items;
 	
 	this.gTable = new googleDataTable();
 	this.gTable.setColumns(this.flatItems[0]);
-	
+
+		/*
 	for (i = 0; i < itemsLength; i++) {
 		this.flatItems.push(flatten(pipeItems[i]));
 	}
+	*/
 	
 	this.gTable.fillColumns(this.flatItems);
 	
@@ -155,26 +158,26 @@ pipe.prototype.collect_data_array = function (key) {
 }
 
 //Return an object which contains all the pipe's parameters & their types
-pipe.prototype.get_data_keys = function () {
+pipe.prototype.get_data_attributes = function () {
 	
 	var item,
 	prop,
 	type,
-	paramListObj = {},
+	attrListObj = {},
 	i = 0;
 	
 	item = this.flatItems[0];
 	
 	for (prop in item) {
 		type = Object.prototype.toString.call(item[prop]).slice(8, -1);
-		paramListObj[prop] = {};
-		paramListObj[prop].id = i;
-		paramListObj[prop].type = type;
-		paramListObj[prop].value = item[prop];
+		attrListObj[prop] = {};
+		attrListObj[prop].id = i;
+		attrListObj[prop].type = type;
+		attrListObj[prop].value = item[prop];
 		i++;
 	}
 	
-	return paramListObj;
+	return attrListObj;
 }
 
 //##########################################################################################################
@@ -224,9 +227,9 @@ function update() {
 	o;
 	
 	pipe = mainpipe;
-	o = mainpipe.get_data_keys();
+	o = mainpipe.get_data_attributes();
 	
-	pipe.updateData();
+	pipe.updateGoogleData();
 	
 	//update JSON view
 	try {
@@ -255,7 +258,7 @@ function updateControlDashboard() {
 	var gTableObj = mainpipe.gTable;
 	//Updates control dashboard
 	//ControlDashboard.propagateAttributeBoxes( gTable );
-	document.getElementById("datatypes").innerHTML = ControlDashboard.makeAttributesList(gTableObj);
+	//document.getElementById("datatypes").innerHTML = ControlDashboard.makeAttributesList(gTableObj);
 	
 }
 
@@ -277,6 +280,9 @@ function update_UI() {
 			.css('visibility', 'hidden')
 			.css('display', 'none');
 	createYQLscriptTag(id);
+	
+	$('#keytable').remove();
+	pipeLoaded = false;
 }
 
 
@@ -338,10 +344,10 @@ function set_pipe_parameters(o) {
 	id,
 	el,
 	out_div,
-	text;
+	text = "";
 	
 	out_div = document.getElementById("pipeparameters");
-	text = "";
+	text += '<fieldset>';
 	
 	if (o.query.count > 0) { // the pipe has parameters
 		list = o.query.results.input;
@@ -352,21 +358,25 @@ function set_pipe_parameters(o) {
 		if ($.isArray(list)) {
 			for (i = 0; i < list.length; i++) {
 				pipelist[id].params.push(list[i]);
-				text += list[i].name + '<input type="text" class="param_value" name="' + list[i].value + '" id="value' + (i + 1) + '"/><br>';
+				//text += list[i].name + '<input type="text" class="param_value" name="' + list[i].value + '" id="value' + (i + 1) + '"/><br>';
+				text += "<p><label for='value1'>"+list[i].name+"</label><input type='text' class='required param_value' name='"+list[i].value+"' id='value" +(i+1) + "' /></p>";
 			}
 		}
 		//only found 1 parameter
 		else { //Object
 			pipelist[id].params.push(list);
-			text += list.name + '  <input type="text" class="param_value" name="' + list.value + '" id="value1"/><br>';
+			text += "<p><label for='value1'>"+list.name+"</label><input type='text' class='required param_value' name='" + list.value + "' id='value1'/></p>";
 		}
 		
 	} else {
 		text = "(This pipe has no parameters)";
 	}
 	
+	text += "</fieldset>"
 	//text = "tetten: " + '<input type="text" class="param_value" name="'+ "tettenvalue1" + '" id="' + "tettenvalue1" +'"/>';
 	out_div.innerHTML = text;
+	
+	$('#commentForm').validate();
 	
 }
 
@@ -408,30 +418,40 @@ function pipeCallCORS() {
 	
 	id = GetSelectedValue('pipelist');
 	
-	request = createCORSRequest("get", createRequestURI(id));
-	renderType = getRenderType();
+	//console.log ( $('input.param_value').val() );
 	
-	document.getElementById('loading').style.display = 'inline';
+	if( $('input:text.param_value[value=""]').length > 0 ) {
+		update_status_text("no parameter", "error");
+	}
 	
-	if (request) {
-		request.onload = function () {
-			
-			if (renderType == "json") {
-				var r = JSON.parse(request.responseText, pipeReviver); //the actual parsing from Yahoo Pipes to a Javascript object
-				//do something with the returned JSON object 'r'
-				if (r.count != 0) {
-					processJSONResponse(r);
-					pipeLoaded = true;
-					//document.getElementById("statustext").innerHTML = r.count + " items loaded.";
-					update_status_text( r.count + " items loaded");	
-					$(".button").css('visibility', 'visible');
+	else {
+		
+		request = createCORSRequest("get", createRequestURI(id));
+		renderType = getRenderType();
+		
+		update_status_text("pipe is loading..", "warning");
+		document.getElementById('statusicon').style.display = 'inline';
+		
+		if (request) {
+			request.onload = function () {
+				
+				if (renderType == "json") {
+					var r = JSON.parse(request.responseText, pipeReviver); //the actual parsing from Yahoo Pipes to a Javascript object
+					//do something with the returned JSON object 'r'
+					if (r.count != 0) {
+						processJSONResponse(r);
+						pipeLoaded = true;
+						//document.getElementById("statustext").innerHTML = r.count + " items loaded.";
+						update_status_text( r.count + " pipe items loaded");	
+						$(".button").css('visibility', 'visible');
+					}
+				} else if (rendertype == "kml") {
+					//do something
 				}
-			} else if (rendertype == "kml") {
-				//do something
-			}
-			
-		};
-		request.send();
+				
+			};
+			request.send();
+		}
 	}
 	
 }
@@ -458,9 +478,10 @@ function processJSONResponse(response) {
 	mainpipe = new pipe(response);
 	mainpipe.flatten_data();
 	
-	o = mainpipe.get_data_keys();
+	o = mainpipe.get_data_attributes();
 	
 	//CREATING ALL THE DATA TABLES
+	$('#keytable').remove();
 	$('#DynamicGrid').append(CreateKeysView(o, "lightPro", true)).fadeIn();
 	create_checkboxes();
 	
@@ -478,7 +499,7 @@ function processJSONResponse(response) {
 	document.getElementById('jsondata').innerHTML = outputDoc;
 	addClickHandlers();
 	
-	document.getElementById('loading').style.display = 'none'; //remove loading indicator
+	document.getElementById('statusicon').style.display = 'none'; //remove loading indicator
 	
 }
 
@@ -547,6 +568,49 @@ function drawExampleChart() {
 	
 }
 
+
+function get_selected_attributes() {
+
+	var selectedNames,
+		selectedValues,
+		key,
+		value,
+		i,
+		hash = [], //result
+		div,
+		str,
+		count = 0;
+
+	selectedNames = $("#keytable").find(".selected th span");
+	selectedValues = $("#keytable tr")
+		.filter(".selected")
+		.find("td.numberCell");
+		
+	for(i=0; i < selectedNames.length; i++ ) {
+		key = selectedNames[i].innerHTML;
+		value = parseInt( selectedValues[i].innerHTML, 10 );
+		hash[value] = key;
+	}
+	
+	
+	div = document.getElementById("selectedattr_div");
+	
+	str = '<ul>'
+	
+	for(i=1; i < hash.length; i++ ) {
+		str += "<li>Column " + i + ": " + hash[i] + "</li>";
+		count++;
+	}
+	
+	mainpipe.gTable.currentDataView = hash; //stores the selected attributes in the main pipe
+
+	//update
+	div.innerHTML = str;
+	update_status_text( count + " attributes selected");
+	pipeConfirmed = true;
+	
+}
+
 function draw_selected_attributes() {
 	
 	var dataTable,
@@ -555,42 +619,73 @@ function draw_selected_attributes() {
 	colNumbers = [],
 	keyNamesArray = [],
 	chart = 'ColumnChart',
-	selectedKeys,
-	allKeys,
+	prop,
+	dataAttributes,
 	i,
 	n,
+	a,
 	chartEditor = null,
-	typeChart;
+	typeChart,
+	container,
+	components;
 	
 	
+	if( pipeLoaded && pipeConfirmed ) {
 	
-	allKeys = mainpipe.get_data_keys();
-	selectedKeys = $("#keytable tr").find("span.selected");
-	
-	//find the keynames of all the selected attributes
-	for (i = 0; i < selectedKeys.length; i++) {
-		key = selectedKeys[i].innerHTML;
-		colNumbers.push( allKeys[key].id );
-	}
+		var div = $('#div_googlechart');
+		div.css('display', 'inherit').css('visibility', 'visible');
+					
+		dataAttributes = mainpipe.get_data_attributes();
+		//selectedKeys = $("#keytable tr").find("span.selected");
+		
+		
+		//GET THE HASH THAT CONTAINS THE SLELECTED ATTRIBUTES
+		a = mainpipe.gTable.currentDataView;
+		
+		for (i=1; i < a.length; i++) {
+			colNumbers.push( dataAttributes[a[i]].id );
+		}
 
-	dataTable = mainpipe.gTable.data;
-	dataView = new google.visualization.DataView(dataTable);
-	dataView.setColumns(colNumbers);
-	
-	typeChart = GetSelectedText('typeChart')
-	
-	wrapper = new google.visualization.ChartWrapper({
-				chartType : typeChart,
-				options : {
-					width : 900,
-					heigth : 300
-				},
-				containerId : 'visualization',
-			});
-	
-	wrapper.setDataTable(dataView);
-	//wrapper.setView(dataView);
-	wrapper.draw();
+		dataTable = mainpipe.gTable.data;
+		dataView = new google.visualization.DataView(dataTable);
+		dataView.setColumns(colNumbers);
+		
+		typeChart = GetSelectedText('typeChart');
+		
+		wrapper = new google.visualization.ChartWrapper({
+					chartType : typeChart,
+					options : {
+						width : 900,
+						heigth : 300,
+						legend : "bottom"
+					},
+					containerId : 'visualization',
+				});
+		
+		wrapper.setDataTable(dataView);
+		//wrapper.setView(dataView);
+		wrapper.draw();
+		
+		console.log (dataView.toDataTable().toJSON() );
+		
+		
+		container = document.getElementById('googletoolbar_div');
+		components = [ {type: 'html', datasource: dataView.toDataTable().toJSON() },
+			{
+				type : 'htmlcode',
+				datasource : dataView,
+				gadget : 'https://www.google.com/ig/modules/pie-chart.xml',
+				userprefs : {
+					'3d' : 1
+			},
+			style : 'width: 800px; height: 700px; border: 3px solid purple;'
+			}
+		];
+		google.visualization.drawToolbar(container, components);
+	}
+	else {
+		update_status_text("Please load pipe & confirm attributes.", "error");
+	}
 	
 }
 
@@ -757,13 +852,16 @@ function convert_selected_attributes() {
 	key,
 	type,
 	i,
-	outputDoc;
+	outputDoc,
+	div;
 	
 	items = mainpipe.flatItems;
 	//key = GetSelectedText('attr1dropdown'),
 	//get the attributes that need to be converted
 	
-	keys = $("#keytable tr").find("span.selected");
+	keys = $("#keytable").find(".selected th span");
+	
+	console.log ( keys );
 	
 	type = GetSelectedText('conversionType');
 	
@@ -775,7 +873,9 @@ function convert_selected_attributes() {
 	}
 	
 	mainpipe.flatItems = items;
-	
+	update_status_text(keys.length + " attribute(s) converted to " + type, "warning");
+	div = document.getElementById("selectedattr_div").innerHTML = "";
+	pipeConfirmed = false;
 	update();
 	
 }

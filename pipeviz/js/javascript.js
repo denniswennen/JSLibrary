@@ -3,15 +3,18 @@ var stack = [0];
 $(document).ready(function () {
 		
 		//INIT onLoad
+		update_status_text("Ready. Waiting for pipe load.");
+		document.getElementById('statusicon').style.display = 'none';
 		$("#btnDel").hide();
 		$(".sliding").hide();
 		createPipeList();
 		$('#DynamicGridLoading').hide();
 		
+		update_UI();
+		
 		$('.button:not("#importpipebutton")').css('visibility', 'hidden');
 		
-		$('#div_timeline, #div_googlechart')
-			.css('visibility', 'hidden');
+		$('#div_timeline, #div_googlechart').css('visibility', 'hidden');
 		
 		$('#div_timeline, #div_googlechart').each(function() {
 			if ($(this).css("visibility") == "hidden") {
@@ -36,7 +39,6 @@ $(document).ready(function () {
 					
 			}
 		);
-		
 		
 		$('.show_hide').click(function () {
 				$(".sliding").slideToggle();
@@ -213,29 +215,24 @@ function create_checkboxes() {
 		.end()
 		.click(function (event) {
 		
-			var num = $("#keytable").find(".selected").length;
+			var num = $("#keytable").find(".selected").length + 1;
 			var result = $("#keytable").find(".numberCell");
 			var i,
 				j,
 				v,
 				bingo;
-			
-			
+					
 			for(i=0; i < result.length; i++) {
 				if( result[i].innerHTML.length !== 0) {
 					v = parseInt( result[i].innerHTML, 10);
 					stack[v] = v;
 				}
 			}
-			console.log ( stack );
-				
-			
 			$(this).toggleClass('selected');
 			
 			if( $(this).hasClass('selected') ) { //number add
 				for(j=0; j < stack.length; j++) {
 					if( stack[j] === undefined ) {
-						console.log ("tetteuuh!");
 						bingo = j;
 						break;
 					}
@@ -245,7 +242,8 @@ function create_checkboxes() {
 				}
 				$(this).find("td.numberCell")
 					.attr('id', 'selected'+bingo)
-					.html( bingo );
+					.html( bingo )
+					.css('fontWeight', 'bold');
 			} 
 			else { //number remove
 				$(this).find("td.numberCell")
@@ -258,14 +256,8 @@ function create_checkboxes() {
 						stack[v] = v;
 					}
 				}
-				
 			}
-			
-			
-			
-			
-			
-			
+
 			if (event.target.type !== 'checkbox') {
 				$(':checkbox', this).attr('checked', function () {
 						return !this.checked;

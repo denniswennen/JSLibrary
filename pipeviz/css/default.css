@@ -28,7 +28,23 @@ background-color:#eeeeee;
 width:300px;
 height:300px;
 z-index: 9002;
+}
 
+/* Table type styles */
+.number {
+	font-weight: bold;
+	color:#0aa868;
+}
+
+.str {
+	font-weight: bold;
+	color:#e40016;
+}
+
+.date {
+	font-weight: bold;
+	color:#077ef7;
+}
 /*
 
 .jsonreport TABLE { border-collapse:collapse; border: solid 1px #ccc; clear: left; background-color: #99CCFF; }
